@@ -15,6 +15,6 @@ func NewTemplates() *Templates {
 	}
 }
 
-func (t *Templates) Render(w http.ResponseWriter, r *http.Request) error {
-	return t.template.ExecuteTemplate(w, r.URL.Path, map[string]interface{}{"Title": "Hello World"})
+func (t *Templates) Render(w http.ResponseWriter, r *http.Request, name string, data interface{}) error {
+	return t.template.ExecuteTemplate(w, name, data)
 }

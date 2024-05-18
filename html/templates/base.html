@@ -1,14 +1,32 @@
+{{- block "base" . -}}
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {{with .Title}}    
+    <title>Wadoh | {{.Title}}</title>
+    {{else}}
+    <title>Wadoh</title>
+    {{end}}
+    <link rel="stylesheet" href="/static/bootstrap.min.css" />
+  </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.Title}}</title>
-</head>
-
-<body>
-    {{- template "content" . -}}
-</body>
-
+  <body class="bg-body-tertiary">
+    <div class="container">
+      <header
+        class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom"
+      >
+        <a
+          href="#"
+          class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none"
+        >
+          <span class="fs-5">Wadoh</span>
+        </a>
+      </header>
+      <main>{{- template "content" . -}}</main>
+    </div>
+    <script src="/static/bootstrap.bundle.min.js"></script>
+  </body>
 </html>
+{{- end -}}
