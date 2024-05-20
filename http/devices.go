@@ -55,6 +55,7 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	w.Header().Set("Content-Type", "text/event-stream")
 
 	lastQr, lastCode := "", ""
 	send := func() {
