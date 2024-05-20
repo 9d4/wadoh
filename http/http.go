@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	webLoginPath = "/login"
+	webLoginPath   = "/login"
+	webDevicesPath = "/devices"
 
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour

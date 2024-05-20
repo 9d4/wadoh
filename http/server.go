@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"net"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
@@ -86,5 +87,12 @@ func (s *Server) serveHTTP(w http.ResponseWriter, r *http.Request) {
 
 func staticHandler(prefix string, fs fs.FS) func(w http.ResponseWriter, r *http.Request) {
 	h := http.StripPrefix(prefix, http.FileServer(http.FS(fs)))
-	return h.ServeHTTP
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/") {
+			http.NotFound(w, r)
+			return
+		}
+		h.ServeHTTP(w, r)
+	}
+	return fn
 }

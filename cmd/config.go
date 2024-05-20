@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"crypto/rand"
 	"path"
 	"strings"
 
@@ -37,6 +38,14 @@ var (
 		},
 	}
 )
+
+func init() {
+	jwtSecret := make([]byte, 32)
+	if _, err := rand.Read(jwtSecret); err != nil {
+		panic(err)
+	}
+	globalDefault.HTTP.JWTSecret = jwtSecret
+}
 
 type globalConf struct {
 	LogLevel zerolog.Level  `koanf:"log_level"`

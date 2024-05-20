@@ -12,7 +12,7 @@ import (
 )
 
 func webLogin(s *Server, w http.ResponseWriter, r *http.Request) {
-	s.templates.Render(w, r, "login.html", nil)
+	renderError(w, r, s.templates.Render(w, r, "login.html", nil))
 }
 
 func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {

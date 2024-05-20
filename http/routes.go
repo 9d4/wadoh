@@ -21,7 +21,8 @@ func initializeRoutes(s *Server) {
 		r.Use(s.authenticated)
 
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("authenticated route"))
+			http.Redirect(w, r, webDevicesPath, http.StatusFound)
 		})
+		r.Get(webDevicesPath, handle(webDevices))
 	})
 }

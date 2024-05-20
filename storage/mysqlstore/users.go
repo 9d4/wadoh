@@ -18,6 +18,20 @@ func (s *usersStore) GetByID(uint) (*users.User, error) {
 	panic("not implemented")
 }
 
+func (s *usersStore) GetByUsername(username string) (*users.User, error) {
+	row := s.db.QueryRow(`SELECT * FROM wadoh_users WHERE username=?`, username)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	var u users.User
+	if err := row.Scan(&u.ID, &u.Name, &u.Username, &u.Password, &u.CreatedAt); err != nil {
+		return nil, err
+	}
+
+	return &u, nil
+}
+
 func (s *usersStore) Page(limit int, after int) ([]users.User, error) {
 	const query = `SELECT * FROM wadoh_users WHERE id > ? LIMIT ?`
 

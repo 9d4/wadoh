@@ -33,7 +33,7 @@ var rootCmd = &cobra.Command{
 	Short: "Start wadoh web server",
 	Run: run(func(cmd *cobra.Command, args []string, storage *storage.Storage) {
 		srv := http.NewServer(storage, func(c *http.Config) {
-			c.Address = global.HTTP.Address
+			*c = global.HTTP
 		})
 
 		log.Debug().Any("a", global).Send()

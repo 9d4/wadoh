@@ -3,6 +3,7 @@ package users
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
@@ -11,6 +12,7 @@ import (
 type StorageProvider interface {
 	Page(limit, after int) ([]User, error)
 	GetByID(uint) (*User, error)
+	GetByUsername(string) (*User, error)
 	Save(u *User) error
 }
 
@@ -32,6 +34,16 @@ func (s *Storage) List(limit, after int) ([]User, error) {
 	return s.provider.Page(limit, after)
 }
 
+func (s *Storage) GetBy(v interface{}) (*User, error) {
+	switch reflect.TypeOf(v).String() {
+	case "string":
+		return s.provider.GetByUsername(v.(string))
+	case "int":
+		return s.provider.GetByID(v.(uint))
+	}
+	return nil, errors.New("invalid lookup type")
+}
+
 func (s *Storage) Save(u *User) (err error) {
 	u.ID = 0
 	u.Name = strings.TrimSpace(u.Name)
@@ -50,6 +62,7 @@ func (s *Storage) Save(u *User) (err error) {
 	if err := s.provider.Save(u); err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -60,4 +73,8 @@ func hashPwd(pwd string) (string, error) {
 	}
 
 	return string(b), nil
+}
+
+func ComparePwd(hash, pwd string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(pwd))
 }
