@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	webLoginPath      = "/login"
-	webDevicesPath    = "/devices"
-	webDevicesNewPath = "/devices/new"
-	webDevicesQRPath  = "/devices/qr"
+	webLoginPath            = "/login"
+	webDevicesPath          = "/devices"
+	webDevicesNewPath       = "/devices/new"
+	webDevicesQRPath        = "/devices/qr"
+	webDevicesGetStatusPath = "/devices/{id}/_status"
 
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour

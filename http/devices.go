@@ -1,12 +1,15 @@
 package http
 
 import (
+	"context"
 	"encoding/base64"
 	"fmt"
 	"net/http"
 	"path"
+	"sync"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/skip2/go-qrcode"
 
 	"github.com/9d4/wadoh/devices"
@@ -121,4 +124,51 @@ func webDevicesConnectedHandle(s *Server, w http.ResponseWriter, r *http.Request
 	})
 
 	http.Redirect(w, r, webDevicesPath, http.StatusFound)
+}
+
+func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
+	jid := chi.RouteContext(r.Context()).URLParam("id")
+	user := userFromCtx(r.Context())
+	status := "Unknown"
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		res, err := s.pbCli.Status(context.Background(), &pb.StatusRequest{
+			Jid: jid,
+		})
+		if err == nil {
+			status = statusResponseToString(res)
+		}
+	}()
+
+	dev, err := s.storage.Devices.GetByID(jid)
+	if err != nil {
+		// TODO: handle in a better way
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if dev.OwnerID != user.ID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	wg.Wait()
+	w.Write([]byte(status))
+}
+
+func statusResponseToString(res *pb.StatusResponse) string {
+	switch res.Status {
+	case pb.StatusResponse_STATUS_ACTIVE:
+		return "Active"
+	case pb.StatusResponse_STATUS_DISCONNECTED:
+		return "Disconnected"
+	case pb.StatusResponse_STATUS_NOT_FOUND:
+		return "Not Found"
+	case pb.StatusResponse_STATUS_UNKNOWN:
+		return "Unknown"
+	default:
+		return ""
+	}
 }

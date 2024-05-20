@@ -7,7 +7,9 @@
     <a href="{{ $data.DevicePath . }}">
         <span class="card bg-base-200 hover:shadow-md decoration-0">
             <span class="card-body p-4">
-                <span class="card-title">{{.Name}}</span>
+                <span class="card-title">{{.Name}}
+                    <span class="badge" hx-get="{{ $data.DevicePath . }}/_status" hx-trigger="every 2s"></span>
+                </span>
                 <p class="text-sm opacity-80">
                     Linked at <time datetime="{{.LinkedAt}}">{{.LinkedAt.Format "02 Jan 2006 15:04"}}</time>
                 </p>

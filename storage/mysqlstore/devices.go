@@ -34,6 +34,21 @@ func (s *devicesStore) ListByOwnerID(ownerID uint) ([]devices.Device, error) {
 	return devs, nil
 }
 
+func (s *devicesStore) GetByID(id string) (*devices.Device, error) {
+	const query = `SELECT id, name, user_id, linked_at FROM wadoh_devices WHERE id=?`
+
+	row := s.db.QueryRow(query, id)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	var dev devices.Device
+	if err := row.Scan(&dev.ID, &dev.Name, &dev.OwnerID, &dev.LinkedAt); err != nil {
+		return nil, err
+	}
+	return &dev, nil
+}
+
 func (s *devicesStore) Save(d *devices.Device) error {
 	const query = `INSERT INTO wadoh_devices (id, name, user_id, linked_at) VALUES (?, ?, ?, ?)`
 

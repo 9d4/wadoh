@@ -2,6 +2,7 @@ package devices
 
 type StorageProvider interface {
 	ListByOwnerID(uint) ([]Device, error)
+	GetByID(string) (*Device, error)
 	Save(*Device) error
 }
 
@@ -21,4 +22,8 @@ func (s *Storage) Save(d *Device) error {
 
 func (s *Storage) ListByOwnerID(ownerID uint) ([]Device, error) {
 	return s.provider.ListByOwnerID(ownerID)
+}
+
+func (s *Storage) GetByID(id string) (*Device, error) {
+	return s.provider.GetByID(id)
 }
