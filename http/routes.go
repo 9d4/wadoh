@@ -20,6 +20,7 @@ func initializeRoutes(s *Server) {
 	r.Group(func(r chi.Router) {
 		r.Use(s.authenticated)
 
+		r.Post(webLogoutPostPath, handle(webLogoutPost))
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, webDevicesPath, http.StatusFound)
 		})

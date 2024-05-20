@@ -11,6 +11,7 @@ import (
 
 const (
 	webLoginPath            = "/login"
+	webLogoutPostPath       = "/logout"
 	webDevicesPath          = "/devices"
 	webDevicesNewPath       = "/devices/new"
 	webDevicesQRPath        = "/devices/qr"

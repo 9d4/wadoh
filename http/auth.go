@@ -46,6 +46,13 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
+func webLogoutPost(s *Server, w http.ResponseWriter, r *http.Request) {
+	clearUserTokenCookie(w)
+	header := w.Header()
+	header["HX-Refresh"] = []string{"true"}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func createUserToken(tokenAuth *jwtauth.JWTAuth, u *users.User) (token jwt.Token, tokenString string, err error) {
 	token, tokenString, err = tokenAuth.Encode(map[string]interface{}{
 		"id":  u.ID,
@@ -67,6 +74,16 @@ func setUserTokenCookie(w http.ResponseWriter, token jwt.Token, tokenString stri
 		Expires:  token.Expiration(),
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, cookie)
+}
+
+func clearUserTokenCookie(w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:   userTokenCookieKey,
+		Path:   "/",
+		MaxAge: -1,
 	}
 
 	http.SetCookie(w, cookie)
