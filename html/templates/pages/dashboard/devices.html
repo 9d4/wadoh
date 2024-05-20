@@ -1,5 +1,19 @@
 {{define "content-title"}}Devices{{end}}
-<!--  -->
 {{define "content"}}
 <a class="btn btn-sm btn-secondary" href="/devices/new">Connect new device</a>
+<div class="my-10 grid grid-cols-1 gap-4">
+    {{ $data := .Data }}
+    {{- range .Data.Devices -}}
+    <a href="{{ $data.DevicePath . }}">
+        <span class="card bg-base-200 hover:shadow-md decoration-0">
+            <span class="card-body p-4">
+                <span class="card-title">{{.Name}}</span>
+                <p class="text-sm opacity-80">
+                    Linked at <time datetime="{{.LinkedAt}}">{{.LinkedAt.Format "02 Jan 2006 15:04"}}</time>
+                </p>
+            </span>
+        </span>
+    </a>
+    {{- end -}}
+</div>
 {{end}}

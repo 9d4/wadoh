@@ -1,0 +1,34 @@
+{{define "content-title"}}Connect Device{{end}}
+{{define "content"}}
+<form id="devForm" class="my-4" hx-target="#pairContainer" hx-post="/devices/qr" hx-ext="chunked" hx-swap="innerHTML"
+    hx-disabled-elt="#devForm *[type]">
+    <div class="join">
+        <input type="name" placeholder="My Device" name="name" class="join-item input input-bordered w-full max-w-xs" required />
+        <input type="tel" placeholder="Phone" name="phone" class="join-item input input-bordered w-full max-w-xs" required />
+        <button type="submit" class="join-item btn btn-primary">Get Code</button>
+    </div>
+</form>
+
+<p>Enter the pair code or scan the QR Code below</p>
+<div id="pairContainer" class="text-2xl"></div>
+
+<script>
+    // this handles pairContainer bug: show list of changes after request
+    // is finished.
+    document.addEventListener("htmx:afterRequest", (e) => {
+        window.afreq = e
+        console.log(e)
+
+        if (e.originalTarget.getAttribute("hx-target") !== "#pairContainer") { return }
+        if (e.detail?.xhr?.response?.includes("success")) {
+            window.location = "/devices"
+            return
+        }
+
+        const swapTarget = document.querySelector(e.originalTarget.getAttribute("hx-target"))
+        if (swapTarget) {
+            swapTarget.innerHTML = "<p>Pairing failed, please try again.</p>"
+        }
+    })
+</script>
+{{end}}

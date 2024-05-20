@@ -50,6 +50,7 @@ func createUserToken(tokenAuth *jwtauth.JWTAuth, u *users.User) (token jwt.Token
 	token, tokenString, err = tokenAuth.Encode(map[string]interface{}{
 		"id":  u.ID,
 		"exp": time.Now().Add(userTokenExpiration).Unix(),
+		"sub": u.Username,
 	})
 	if err != nil {
 		return

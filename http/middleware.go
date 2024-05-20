@@ -34,6 +34,15 @@ func (s *Server) authenticated(next http.Handler) http.Handler {
 			return
 		}
 
+		user, err := s.storage.Users.GetBy(token.Subject())
+		if err != nil {
+			redirectLoginPage()
+			return
+		}
+
+		r = r.WithContext(newCtxUserToken(r.Context(), token))
+		r = r.WithContext(newCtxUser(r.Context(), user))
+
 		next.ServeHTTP(w, r)
 	}
 

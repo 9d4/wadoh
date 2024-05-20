@@ -9,10 +9,13 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/9d4/wadoh/http"
 	"github.com/9d4/wadoh/storage"
 	"github.com/9d4/wadoh/users"
+	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
 func init() {
@@ -32,7 +35,13 @@ var rootCmd = &cobra.Command{
 	Use:   "wadoh",
 	Short: "Start wadoh web server",
 	Run: run(func(cmd *cobra.Command, args []string, storage *storage.Storage) {
-		srv := http.NewServer(storage, func(c *http.Config) {
+		conn, err := grpc.NewClient(global.WadohBeDSN, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			log.Fatal().Err(err).Caller().Send()
+		}
+		pbCli := pb.NewControllerServiceClient(conn)
+
+		srv := http.NewServer(storage, pbCli, func(c *http.Config) {
 			*c = global.HTTP
 		})
 

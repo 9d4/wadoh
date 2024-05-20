@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 
 	"github.com/9d4/wadoh/html"
 	"github.com/9d4/wadoh/storage"
+	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
 type Config struct {
@@ -30,11 +32,13 @@ type Server struct {
 	templates *html.Templates
 
 	tokenAuth *jwtauth.JWTAuth
+
+	pbCli pb.ControllerServiceClient
 }
 
 type Option func(*Config)
 
-func NewServer(storage *storage.Storage, opts ...Option) *Server {
+func NewServer(storage *storage.Storage, pbCli pb.ControllerServiceClient, opts ...Option) *Server {
 	s := &Server{
 		config:    &Config{},
 		server:    &http.Server{},
@@ -42,6 +46,7 @@ func NewServer(storage *storage.Storage, opts ...Option) *Server {
 		storage:   storage,
 		staticFs:  html.StaticFs(),
 		templates: html.NewTemplates(),
+		pbCli:     pbCli,
 	}
 
 	for _, fn := range opts {
@@ -52,6 +57,7 @@ func NewServer(storage *storage.Storage, opts ...Option) *Server {
 
 	s.tokenAuth = jwtauth.New("HS256", s.config.JWTSecret, nil)
 
+	s.router.Use(middleware.StripSlashes)
 	s.router.Use(jwtauth.Verifier(s.tokenAuth))
 	initializeRoutes(s)
 

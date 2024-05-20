@@ -35,7 +35,8 @@ func NewStore(dsn string) (*Store, error) {
 	}
 
 	return &Store{
-		db:    db,
-		Users: newUsersStore(db),
+		db:      db,
+		Users:   newUsersStore(db),
+		Devices: newDevicesStore(db),
 	}, nil
 }

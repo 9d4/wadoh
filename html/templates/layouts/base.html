@@ -20,6 +20,8 @@
     {{- block "content" . -}} {{- end -}}
     {{end}}
     {{if eq .Layout "dashboard"}}{{block "dashboard" .}}{{end}}{{end}}
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/htmx.ext.chunked-transfer.js"></script>
     <script type="module" src="/static/dist/js/main.js"></script>
   </body>
 </html>

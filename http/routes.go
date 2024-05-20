@@ -24,5 +24,7 @@ func initializeRoutes(s *Server) {
 			http.Redirect(w, r, webDevicesPath, http.StatusFound)
 		})
 		r.Get(webDevicesPath, handle(webDevices))
+		r.Get(webDevicesNewPath, handle(webDevicesNew))
+		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
 	})
 }

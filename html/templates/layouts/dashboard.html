@@ -27,16 +27,16 @@
         </label>
       </div>
       <a class="flex-1 text-xl font-semibold px-2 mx-2" href="/">Wadoh</a>
-      
-      <!-- <div class="flex-1 text-xl font-semibold px-2 mx-2">Wadoh</div> -->
       <div class="flex-none hidden lg:block">
         <ul class="menu menu-horizontal">
           <!-- Navbar menu content here -->
         </ul>
       </div>
     </div>
-    <main class="container p-4 prose">
-      <h2 class="mb-2">{{- block "content-title" . -}}{{- end -}}</h2>
+    <main class="container p-4">
+      <div class="prose">
+        <h2 class="mb-2">{{- block "content-title" . -}}{{- end -}}</h2>
+      </div>
       {{template "content" .}}
     </main>
   </div>

@@ -28,7 +28,8 @@ var (
 	configDirs    = []string{".", "/etc/wadoh"}
 	global        globalConf
 	globalDefault = globalConf{
-		LogLevel: zerolog.InfoLevel,
+		LogLevel:   zerolog.InfoLevel,
+		WadohBeDSN: "localhost:50051",
 		HTTP: http.Config{
 			Address: ":8080",
 		},
@@ -48,9 +49,10 @@ func init() {
 }
 
 type globalConf struct {
-	LogLevel zerolog.Level  `koanf:"log_level"`
-	HTTP     http.Config    `koanf:"http"`
-	Storage  storage.Config `koanf:"storage"`
+	LogLevel   zerolog.Level  `koanf:"log_level"`
+	HTTP       http.Config    `koanf:"http"`
+	WadohBeDSN string         `koanf:"wadoh_be_dsn"`
+	Storage    storage.Config `koanf:"storage"`
 }
 
 func setupConfig() {
