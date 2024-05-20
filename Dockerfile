@@ -26,7 +26,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-COPY --from=build-fe /build/static/dist ./html/static/
+COPY --from=build-fe /build/static/dist ./html/static/dist
 ENV GOCACHE=/root/.cache/go-build
 RUN --mount=type=cache,target="/root/.cache/go-build" \
     go build -buildvcs -o /usr/bin/wadoh .
