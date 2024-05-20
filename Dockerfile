@@ -1,5 +1,21 @@
 # +----------------------------------------------------+
-# |Stage 1: Build                                      |
+# |Stage 1: Build frontend                             |
+# +----------------------------------------------------+
+FROM node:20-alpine3.19 AS build-fe
+
+COPY ./html/package.json /tmp/package.json
+RUN cd /tmp && yarn install
+RUN mkdir /build && cp -a /tmp/node_modules /build/
+
+# Build
+WORKDIR /build
+COPY ./html /build/
+
+RUN yarn run build
+
+
+# +----------------------------------------------------+
+# |Stage 1: Build binary                               |
 # +----------------------------------------------------+
 FROM golang:1.21.10-alpine3.19 AS build
 
@@ -10,6 +26,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
+COPY --from=build-fe /build/static/dist ./html/static/
 ENV GOCACHE=/root/.cache/go-build
 RUN --mount=type=cache,target="/root/.cache/go-build" \
     go build -buildvcs -o /usr/bin/wadoh .
