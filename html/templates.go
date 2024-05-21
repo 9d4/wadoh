@@ -1,6 +1,7 @@
 package html
 
 import (
+	"bytes"
 	"html/template"
 	"net/http"
 	"strings"
@@ -14,7 +15,9 @@ type Templates struct {
 
 func NewTemplates() *Templates {
 	return &Templates{
-		base: template.Must(template.ParseFS(TemplatesFS(), "layouts/base.html")),
+		base: template.Must(template.ParseFS(TemplatesFS(), "layouts/base.html")).Funcs(template.FuncMap{
+			"partial": partial,
+		}),
 	}
 }
 
@@ -61,6 +64,23 @@ func (t *Templates) RenderPartial(w http.ResponseWriter, name string, data *Part
 		log.Debug().Caller().Err(err).Send()
 		return
 	}
+}
+
+func partial(name string, data ...interface{}) template.HTML {
+	part, err := template.ParseFS(TemplatesFS(), "partials/"+name)
+	var out bytes.Buffer
+	var dataToExec interface{}
+	if len(data) > 0 {
+		dataToExec = data[0]
+	}
+
+	if err != nil {
+		template.New("-").Execute(&out, dataToExec)
+		return template.HTML(out.String())
+	}
+
+	part.Execute(&out, dataToExec)
+	return template.HTML(out.String())
 }
 
 type TemplateData struct {

@@ -4,6 +4,7 @@ type StorageProvider interface {
 	ListByOwnerID(uint) ([]Device, error)
 	GetByID(string) (*Device, error)
 	Save(*Device) error
+	Patch(*Device) error
 }
 
 type Storage struct {
@@ -26,4 +27,11 @@ func (s *Storage) ListByOwnerID(ownerID uint) ([]Device, error) {
 
 func (s *Storage) GetByID(id string) (*Device, error) {
 	return s.provider.GetByID(id)
+}
+
+func (s *Storage) Rename(id, newName string) error {
+	return s.provider.Patch(&Device{
+		ID:   id,
+		Name: newName,
+	})
 }

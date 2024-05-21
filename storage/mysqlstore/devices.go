@@ -2,6 +2,7 @@ package mysqlstore
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/9d4/wadoh/devices"
 )
@@ -61,5 +62,35 @@ func (s *devicesStore) Save(d *devices.Device) error {
 		return err
 	}
 
+	return nil
+}
+
+func (s *devicesStore) Patch(d *devices.Device) error {
+	query := `UPDATE wadoh_devices SET $cols WHERE id=?`
+	cols := ""
+	args := []any{}
+
+	i := 0
+	if d.Name != "" {
+		cols += "name=?"
+		args = append(args, d.Name)
+		i++
+	}
+	if d.OwnerID != 0 {
+		if i != 0 {
+			cols += ",user_id=?"
+		} else {
+			cols += "user_id=?"
+		}
+		args = append(args, d.OwnerID)
+	}
+	// append the id
+	args = append(args, d.ID)
+	query = strings.Replace(query, "$cols", cols, 1)
+
+	_, err := s.db.Exec(query, args...)
+	if err != nil {
+		return err
+	}
 	return nil
 }

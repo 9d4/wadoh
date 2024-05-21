@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"path"
+	"strings"
 	"sync"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/skip2/go-qrcode"
 
 	"github.com/9d4/wadoh/devices"
+	"github.com/9d4/wadoh/html"
 	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
@@ -22,6 +24,10 @@ type devicesPageData struct {
 
 func (d devicesPageData) DevicePath(dev devices.Device) string {
 	return path.Join(webDevicesPath, dev.ID)
+}
+
+func (d devicesPageData) Edit(dev devices.Device) string {
+	return strings.ReplaceAll(webDevicesRenamePath, "{id}", dev.ID)
 }
 
 func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -176,4 +182,49 @@ func statusResponseToString(res *pb.StatusResponse) string {
 	default:
 		return ""
 	}
+}
+
+func webDevicesRename(s *Server, w http.ResponseWriter, r *http.Request) {
+	jid := chi.RouteContext(r.Context()).URLParam("id")
+	user := userFromCtx(r.Context())
+
+	device, err := s.storage.Devices.GetByID(jid)
+	if err != nil {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	if device.OwnerID != user.ID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	s.templates.RenderPartial(w, "devices/rename.html",
+		html.NewPartialData().Set("ID", device.ID).Set("Name", device.Name))
+}
+
+func webDevicesRenamePut(s *Server, w http.ResponseWriter, r *http.Request) {
+	ctx := chi.RouteContext(r.Context())
+	jid := ctx.URLParam("id")
+	user := userFromCtx(r.Context())
+	newName := r.FormValue("new_name")
+
+	device, err := s.storage.Devices.GetByID(jid)
+	if err != nil {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	if device.OwnerID != user.ID {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	s.storage.Devices.Rename(device.ID, newName)
+
+	device, err = s.storage.Devices.GetByID(jid)
+	if err != nil {
+		http.Error(w, "error: Please refresh", http.StatusOK)
+		return
+	}
+
+	s.templates.RenderPartial(w, "devices/name.html",
+		html.NewPartialData().Set("ID", device.ID).Set("Name", device.Name))
 }

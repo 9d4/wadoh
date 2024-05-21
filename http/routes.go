@@ -29,5 +29,8 @@ func initializeRoutes(s *Server) {
 		r.Get(webDevicesNewPath, handle(webDevicesNew))
 		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
 		r.Get(webDevicesGetStatusPath, handle(webDevicesGetStatus))
+
+		r.Get(webDevicesRenamePath, handle(webDevicesRename))
+		r.Put(webDevicesRenamePath, handle(webDevicesRenamePut))
 	})
 }

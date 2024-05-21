@@ -16,6 +16,8 @@ const (
 	webDevicesNewPath       = "/devices/new"
 	webDevicesQRPath        = "/devices/qr"
 	webDevicesGetStatusPath = "/devices/{id}/_status"
+	webDevicesRenamePath    = "/devices/{id}/rename"
+	webDevicesRenamePutPath = "/devices/{id}/rename"
 
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour
