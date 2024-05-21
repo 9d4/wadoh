@@ -1,7 +1,7 @@
 {{define "content-title"}}Connect Device{{end}}
 {{define "content"}}
 <form id="devForm" class="my-4" hx-target="#pairContainer" hx-post="/devices/qr" hx-ext="chunked" hx-swap="innerHTML"
-    hx-disabled-elt="#devForm *[type]">
+    hx-disabled-elt="#devForm *[type]" hx-request='{"credentials":true,"noHeaders":true}'>
     <div class="join">
         <input type="name" placeholder="My Device" name="name" class="join-item input input-bordered w-full max-w-xs" required />
         <input type="tel" placeholder="Phone" name="phone" class="join-item input input-bordered w-full max-w-xs" required />
