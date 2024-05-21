@@ -12,11 +12,6 @@ import (
 	"github.com/9d4/wadoh/users"
 )
 
-func webHTMXRedirect(w http.ResponseWriter, url string, code int) {
-	w.Header().Set("HX-Redirect", url)
-	w.WriteHeader(code)
-}
-
 func webLogin(s *Server, w http.ResponseWriter, r *http.Request) {
 	renderError(w, r, s.templates.Render(w, r, "login.html", nil))
 }
@@ -47,14 +42,15 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 
 	setUserTokenCookie(w, token, tokenString)
 
-	if next := r.FormValue(redirectContinueParam); next != "" {
-		url, err := url.Parse(next)
-		if err == nil {
-			webHTMXRedirect(w, url.String(), http.StatusOK)
+	if currentUrl := getHTMXCurrentURL(r); currentUrl != "" {
+		url, _ := url.Parse(currentUrl)
+		if cont := url.Query().Get(redirectContinueParam); cont != "" {
+			webHTMXRedirect(w, r, cont, http.StatusOK)
 			return
 		}
 	}
-	webHTMXRedirect(w, "/", http.StatusOK)
+
+	webHTMXRedirect(w, r, "/", http.StatusOK)
 }
 
 func webLogoutPost(s *Server, w http.ResponseWriter, r *http.Request) {

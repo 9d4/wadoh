@@ -53,6 +53,7 @@ func (s *Server) unAuthenticated(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		_, _, err := jwtauth.FromContext(r.Context())
 		if err == nil {
+			webHTMXRedirect(w, r, "/", http.StatusFound)
 			http.Redirect(w, r, "/", http.StatusFound)
 		}
 
