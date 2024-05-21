@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"net/http"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 type Templates struct {
@@ -47,7 +49,33 @@ func (t *Templates) Render(w http.ResponseWriter, r *http.Request, name string, 
 	return page.Execute(w, tmplData)
 }
 
+func (t *Templates) RenderPartial(w http.ResponseWriter, name string, data *PartialData) {
+	page, err := template.ParseFS(TemplatesFS(), "partials/"+name)
+	if err != nil {
+		http.Error(w, "unable to render view", http.StatusInternalServerError)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+	if err := page.Execute(w, map[string]interface{}(*data)); err != nil {
+		http.Error(w, "unable to render view", http.StatusInternalServerError)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+}
+
 type TemplateData struct {
 	Layout string
 	Data   interface{}
+}
+
+type PartialData map[string]interface{}
+
+func NewPartialData() *PartialData {
+	return &PartialData{}
+}
+
+func (d *PartialData) Set(key string, value interface{}) *PartialData {
+	dMap := map[string]interface{}(*d)
+	dMap[key] = value
+	return (*PartialData)(&dMap)
 }

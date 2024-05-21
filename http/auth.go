@@ -8,8 +8,14 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 
+	"github.com/9d4/wadoh/html"
 	"github.com/9d4/wadoh/users"
 )
+
+func webHTMXRedirect(w http.ResponseWriter, url string, code int) {
+	w.Header().Set("HX-Redirect", url)
+	w.WriteHeader(code)
+}
 
 func webLogin(s *Server, w http.ResponseWriter, r *http.Request) {
 	renderError(w, r, s.templates.Render(w, r, "login.html", nil))
@@ -19,18 +25,23 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	username := r.PostFormValue("username")
 	password := r.PostFormValue("password")
 
+	sendErr := func() {
+		s.templates.RenderPartial(w, "login/error_msg.html",
+			html.NewPartialData().Set("message", "Credentials does not match our records."))
+	}
+
 	user, err := s.storage.Users.GetBy(username)
 	if err != nil {
-		renderError(w, r, err)
+		sendErr()
 		return
 	}
 	if err := users.ComparePwd(user.Password, password); err != nil {
-		renderError(w, r, err)
+		sendErr()
 		return
 	}
 	token, tokenString, err := createUserToken(s.tokenAuth, user)
 	if err != nil {
-		renderError(w, r, err)
+		sendErr()
 		return
 	}
 
@@ -39,11 +50,11 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	if next := r.FormValue(redirectContinueParam); next != "" {
 		url, err := url.Parse(next)
 		if err == nil {
-			http.Redirect(w, r, url.String(), http.StatusFound)
+			webHTMXRedirect(w, url.String(), http.StatusOK)
 			return
 		}
 	}
-	http.Redirect(w, r, "/", http.StatusFound)
+	webHTMXRedirect(w, "/", http.StatusOK)
 }
 
 func webLogoutPost(s *Server, w http.ResponseWriter, r *http.Request) {
