@@ -50,12 +50,15 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		http.NotFound(w, r)
 		return
 	}
-	w.Header().Set("Content-Type", "text/event-stream")
 
 	lastQr, lastCode := "", ""
 	send := func() {
@@ -67,6 +70,7 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 		if lastQr != "" {
 			html += fmt.Sprintf(`<img src="data:image/png;base64, %s"/>`, lastQr)
 		}
+		html += "\n"
 
 		w.Write([]byte(html))
 		flusher.Flush()
