@@ -15,7 +15,7 @@
                 Linked at <time datetime="{{.LinkedAt}}">{{.LinkedAt.Format "02 Jan 2006 15:04"}}</time>
             </p>
             <a hx-get="/devices/item/{{.ID}}" hx-target="#devicesContainer" hx-push-url="/devices/{{.ID}}" role="btn"
-                class="me-auto btn btwebDevicesItemPatrolen-sm btn-primary">Manage</a>
+                class="me-auto btn btn-sm btn-primary">Manage</a>
         </span>
     </div>
     {{- end -}}
