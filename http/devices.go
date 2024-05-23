@@ -159,12 +159,14 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 func webDevicesConnectedHandle(s *Server, w http.ResponseWriter, r *http.Request, name, jid string) {
 	user := userFromCtx(r.Context())
 
-	s.storage.Devices.Save(&devices.Device{
+	if err := s.storage.Devices.Save(&devices.Device{
 		ID:       jid,
 		Name:     name,
 		OwnerID:  user.ID,
 		LinkedAt: time.Now(),
-	})
+	}); err != nil {
+		log.Debug().Caller().Err(err).Send()
+	}
 
 	http.Redirect(w, r, webDevicesPath, http.StatusFound)
 }

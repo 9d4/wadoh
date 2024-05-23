@@ -38,4 +38,9 @@ func initializeRoutes(s *Server) {
 		r.Get(webDevicesPartialAPIKeyPath, handle(webDevicesPartialAPIKey))
 		r.Post(webDevicesPartialAPIKeyGenPath, handle(webDevicesPartialAPIKeyGenerate))
 	})
+
+	r.Group(func(r chi.Router) {
+        r.Use(s.apiAuthenticated)
+		r.Post(apiDevicesSendMessagePath, handle(apiDevicesSendMessage))
+	})
 }

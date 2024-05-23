@@ -152,3 +152,41 @@ func (s *devicesStore) SaveAPIKey(key *devices.DeviceApiKey) error {
 
 	return tx.Commit()
 }
+
+func (s *devicesStore) GetByAPIToken(token string) (*devices.Device, error) {
+	const query = "SELECT devices.id, devices.name, devices.user_id, devices.linked_at, " +
+		"`keys`.id, `keys`.name, `keys`.token, `keys`.created_at FROM wadoh_devices devices " +
+		"LEFT JOIN wadoh_device_api_keys `keys` ON `keys`.jid=devices.id " +
+		"WHERE `keys`.token = ?"
+
+	row := s.db.QueryRow(query, token)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	var dev devices.Device
+	var keyID *uint
+	var keyName, keyToken *string
+	var keyCreatedAt *time.Time
+
+	if err := row.Scan(&dev.ID, &dev.Name, &dev.OwnerID, &dev.LinkedAt,
+		&keyID, &keyName, &keyToken, &keyCreatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	if keyID != nil {
+		dev.ApiKey.ID = *keyID
+	}
+	if keyName != nil {
+		dev.ApiKey.Name = *keyName
+	}
+	if keyToken != nil {
+		dev.ApiKey.Token = *keyToken
+	}
+	if keyCreatedAt != nil {
+		dev.ApiKey.CreatedAt = *keyCreatedAt
+	}
+
+	return &dev, nil
+}

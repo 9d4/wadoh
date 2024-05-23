@@ -12,6 +12,7 @@ type StorageProvider interface {
 	Save(*Device) error
 	Patch(*Device) error
 	SaveAPIKey(*DeviceApiKey) error
+	GetByAPIToken(string) (*Device, error)
 }
 
 type Storage struct {
@@ -58,4 +59,8 @@ func (s *Storage) GenNewDevAPIKey(deviceID string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *Storage) GetByAPIToken(token string) (*Device, error) {
+	return s.provider.GetByAPIToken(token)
 }
