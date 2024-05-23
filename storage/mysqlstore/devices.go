@@ -93,17 +93,6 @@ func (s *devicesStore) Save(d *devices.Device) error {
 		return err
 	}
 
-	result, err = tx.Exec(`INSERT INTO wadoh_device_api_keys (jid, name, token, created_at) VALUES (?, ?, ?, ?)`)
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-	_, err = result.RowsAffected()
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
-
 	return tx.Commit()
 }
 
