@@ -31,9 +31,11 @@ func initializeRoutes(s *Server) {
 		r.Get(webDevicesPartialItemPath, handle(webDevicesPartialItem))
 		r.Get(webDevicesNewPath, handle(webDevicesNew))
 		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
-		r.Get(webDevicesPartialGetStatusPath, handle(webDevicesGetStatus))
 
+		r.Get(webDevicesPartialGetStatusPath, handle(webDevicesGetStatus))
 		r.Get(webDevicesPartialRenamePath, handle(webDevicesRename))
 		r.Put(webDevicesPartialRenamePath, handle(webDevicesRenamePut))
+		r.Get(webDevicesPartialAPIKeyPath, handle(webDevicesPartialAPIKey))
+		r.Post(webDevicesPartialAPIKeyGenPath, handle(webDevicesPartialAPIKeyGenerate))
 	})
 }

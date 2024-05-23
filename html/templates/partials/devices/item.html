@@ -2,7 +2,10 @@
     hx-push-url="/devices">
     Devices
 </a>
-<div class="prose">
+<div class="prose mb-6">
     <h2 class="mb-2">{{.Device.Name}}</h2>
+    <p class="mb-0">{{ devicePhone .Device }}</p>
     <span hx-get="/devices/{{.Device.ID}}/_status" hx-trigger="load,every 3s"></span>
 </div>
+
+<div hx-get="/devices/{{.Device.ID}}/apikey" hx-trigger="load"></div>

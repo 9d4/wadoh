@@ -58,18 +58,18 @@ func (s *devicesStore) GetByID(id string) (*devices.Device, error) {
 		return nil, err
 	}
 
-    if keyID != nil {
-        dev.ApiKey.ID = *keyID
-    }
-    if keyName != nil {
-        dev.ApiKey.Name = *keyName
-    }
-    if keyToken != nil {
-        dev.ApiKey.Token = *keyToken
-    }
-    if keyCreatedAt != nil {
-        dev.ApiKey.CreatedAt = *keyCreatedAt
-    }
+	if keyID != nil {
+		dev.ApiKey.ID = *keyID
+	}
+	if keyName != nil {
+		dev.ApiKey.Name = *keyName
+	}
+	if keyToken != nil {
+		dev.ApiKey.Token = *keyToken
+	}
+	if keyCreatedAt != nil {
+		dev.ApiKey.CreatedAt = *keyCreatedAt
+	}
 
 	return &dev, nil
 }
@@ -135,4 +135,31 @@ func (s *devicesStore) Patch(d *devices.Device) error {
 		return err
 	}
 	return nil
+}
+
+func (s *devicesStore) SaveAPIKey(key *devices.DeviceApiKey) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.Exec(`DELETE FROM wadoh_device_api_keys WHERE
+        jid = ?`, key.DeviceID); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	res, err := tx.Exec(`INSERT INTO wadoh_device_api_keys
+        (jid, name, token, created_at) VALUES (?,?,?,?)`,
+		key.DeviceID, key.Name, key.Token, key.CreatedAt)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if _, err := res.LastInsertId(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

@@ -1,6 +1,11 @@
 package devices
 
-import "time"
+import (
+	"bytes"
+	"crypto/rand"
+	"encoding/base64"
+	"time"
+)
 
 type Device struct {
 	ID       string       `json:"id"`
@@ -12,7 +17,22 @@ type Device struct {
 
 type DeviceApiKey struct {
 	ID        uint      `json:"id"`
+	DeviceID  string    `json:"device_id"`
 	Name      string    `json:"name"`
 	Token     string    `json:"token"`
 	CreatedAt time.Time `json:"created_at"`
+}
+
+func GenerateAPIKey(length int) (key string, err error) {
+	b := make([]byte, length)
+	_, err = rand.Read(b)
+	if err != err {
+		return
+	}
+	out := bytes.Buffer{}
+	_, err = base64.NewEncoder(base64.StdEncoding, &out).Write(b)
+	if err != nil {
+		return
+	}
+	return out.String(), nil
 }

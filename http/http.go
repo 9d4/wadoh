@@ -21,6 +21,8 @@ const (
 	webDevicesPartialItemPath      = "/devices/item/{id}"
 	webDevicesPartialGetStatusPath = "/devices/{id}/_status"
 	webDevicesPartialRenamePath    = "/devices/{id}/rename"
+	webDevicesPartialAPIKeyPath    = "/devices/{id}/apikey"
+	webDevicesPartialAPIKeyGenPath = "/devices/{id}/genkey"
 
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour

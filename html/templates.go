@@ -70,8 +70,11 @@ func (t *Templates) RenderPartial(w http.ResponseWriter, name string, data *Part
 	}
 }
 
-var templateFuncs = template.FuncMap{
-	"partial": partial,
+var templateFuncs = template.FuncMap{}
+
+func init() {
+	templateFuncs["partial"] = partial
+	templateFuncs["devicePhone"] = devicePhone
 }
 
 func partial(name string, data ...interface{}) template.HTML {
@@ -82,15 +85,11 @@ func partial(name string, data ...interface{}) template.HTML {
 		dataToExec = data[0]
 	}
 
-	funcs := template.FuncMap{
-		"partial": partial,
-	}
-
 	if err != nil {
-		template.New("-").Funcs(funcs).Execute(&out, dataToExec)
+		template.New("-").Funcs(templateFuncs).Execute(&out, dataToExec)
 		return template.HTML(out.String())
 	}
-	part = part.Funcs(funcs)
+	part = part.Funcs(templateFuncs)
 	part.Execute(&out, dataToExec)
 	return template.HTML(out.String())
 }

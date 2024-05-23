@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -262,4 +263,43 @@ func webDevicesRenamePut(s *Server, w http.ResponseWriter, r *http.Request) {
 
 	s.templates.RenderPartial(w, "devices/name.html",
 		html.NewPartialData().Set("ID", device.ID).Set("Name", device.Name))
+}
+
+func webDevicesPartialAPIKey(s *Server, w http.ResponseWriter, r *http.Request) {
+	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	if err != nil {
+		http.Error(w, "unable to render this part", http.StatusOK)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+
+	s.templates.RenderPartial(w, "devices/api_key.html", html.NewPartialData().
+		Set("Device", device))
+}
+
+func webDevicesPartialAPIKeyGenerate(s *Server, w http.ResponseWriter, r *http.Request) {
+	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	if err != nil {
+		http.Error(w, "unable to render this part", http.StatusOK)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+	if err := s.storage.Devices.GenNewDevAPIKey(device.ID); err != nil {
+		log.Debug().Caller().Err(err).Send()
+	}
+	device, _ = getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	s.templates.RenderPartial(w, "devices/api_key.html", html.NewPartialData().
+		Set("Device", device))
+}
+
+func getDevice(s *Server, ctx context.Context, deviceID string) (*devices.Device, error) {
+	user := userFromCtx(ctx)
+	device, err := s.storage.Devices.GetByID(deviceID)
+	if err != nil {
+		return nil, err
+	}
+	if device.OwnerID != user.ID {
+		return nil, os.ErrPermission
+	}
+	return device, nil
 }
