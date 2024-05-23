@@ -10,14 +10,17 @@ import (
 )
 
 const (
-	webLoginPath            = "/login"
-	webLogoutPostPath       = "/logout"
-	webDevicesPath          = "/devices"
-	webDevicesNewPath       = "/devices/new"
-	webDevicesQRPath        = "/devices/qr"
-	webDevicesGetStatusPath = "/devices/{id}/_status"
-	webDevicesRenamePath    = "/devices/{id}/rename"
-	webDevicesRenamePutPath = "/devices/{id}/rename"
+	webLoginPath       = "/login"
+	webLogoutPostPath  = "/logout"
+	webDevicesPath     = "/devices"
+	webDevicesItemPath = "/devices/{id}"
+	webDevicesNewPath  = "/devices/new"
+	webDevicesQRPath   = "/devices/qr"
+
+	webDevicesPartialListPath      = "/devices/list"
+	webDevicesPartialItemPath      = "/devices/item/{id}"
+	webDevicesPartialGetStatusPath = "/devices/{id}/_status"
+	webDevicesPartialRenamePath    = "/devices/{id}/rename"
 
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour

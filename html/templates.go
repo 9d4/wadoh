@@ -15,9 +15,9 @@ type Templates struct {
 
 func NewTemplates() *Templates {
 	return &Templates{
-		base: template.Must(template.ParseFS(TemplatesFS(), "layouts/base.html")).Funcs(template.FuncMap{
-			"partial": partial,
-		}),
+		base: template.Must(
+			template.ParseFS(TemplatesFS(), "layouts/base.html"),
+		).Funcs(templateFuncs),
 	}
 }
 
@@ -53,7 +53,11 @@ func (t *Templates) Render(w http.ResponseWriter, r *http.Request, name string, 
 }
 
 func (t *Templates) RenderPartial(w http.ResponseWriter, name string, data *PartialData) {
-	page, err := template.ParseFS(TemplatesFS(), "partials/"+name)
+	names := strings.Split(name, "/")
+	partialPath := "partials/" + name
+	page, err := template.New(names[len(names)-1]).
+		Funcs(templateFuncs).
+		ParseFS(TemplatesFS(), partialPath)
 	if err != nil {
 		http.Error(w, "unable to render view", http.StatusInternalServerError)
 		log.Debug().Caller().Err(err).Send()
@@ -66,6 +70,10 @@ func (t *Templates) RenderPartial(w http.ResponseWriter, name string, data *Part
 	}
 }
 
+var templateFuncs = template.FuncMap{
+	"partial": partial,
+}
+
 func partial(name string, data ...interface{}) template.HTML {
 	part, err := template.ParseFS(TemplatesFS(), "partials/"+name)
 	var out bytes.Buffer
@@ -74,11 +82,15 @@ func partial(name string, data ...interface{}) template.HTML {
 		dataToExec = data[0]
 	}
 
-	if err != nil {
-		template.New("-").Execute(&out, dataToExec)
-		return template.HTML(out.String())
+	funcs := template.FuncMap{
+		"partial": partial,
 	}
 
+	if err != nil {
+		template.New("-").Funcs(funcs).Execute(&out, dataToExec)
+		return template.HTML(out.String())
+	}
+	part = part.Funcs(funcs)
 	part.Execute(&out, dataToExec)
 	return template.HTML(out.String())
 }

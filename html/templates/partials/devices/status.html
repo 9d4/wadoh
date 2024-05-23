@@ -1,0 +1,9 @@
+{{- $type:="" -}}
+{{- if eq .Status 1 -}}
+{{- $type = "success" -}}
+{{- else if eq .Status 2 -}}
+{{- $type = "warning" -}}
+{{- else if eq .Status 3 -}}
+{{- $type = "error" -}}
+{{- end -}}
+<span class="ms-auto badge badge-{{$type}}">{{.StatusString}}</span>

@@ -1,0 +1,22 @@
+<div class="prose">
+    <h2 class="mb-2">Devices</h2>
+</div>
+<a class="btn btn-sm btn-secondary" href="/devices/new">Connect new device</a>
+<div class="my-10 grid grid-cols-1 gap-4">
+    {{ $data := . }}
+    {{- range .Devices -}}
+    <div class="card bg-base-200 hover:shadow-md decoration-0">
+        <span class="card-body p-4">
+            <div class="card-title">
+                {{- partial "devices/name.html" . -}}
+                <span class="ms-auto badge" hx-get="/devices/{{.ID}}/_status" hx-trigger="load,every 3s"></span>
+            </div>
+            <p class="text-sm opacity-80">
+                Linked at <time datetime="{{.LinkedAt}}">{{.LinkedAt.Format "02 Jan 2006 15:04"}}</time>
+            </p>
+            <a hx-get="/devices/item/{{.ID}}" hx-target="#devicesContainer" hx-push-url="/devices/{{.ID}}" role="btn"
+                class="me-auto btn btwebDevicesItemPatrolen-sm btn-primary">Manage</a>
+        </span>
+    </div>
+    {{- end -}}
+</div>

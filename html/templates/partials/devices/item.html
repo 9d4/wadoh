@@ -1,0 +1,8 @@
+<a class="font-semibold cursor-pointer text-primary" hx-get="/devices/list" hx-target="#devicesContainer"
+    hx-push-url="/devices">
+    Devices
+</a>
+<div class="prose">
+    <h2 class="mb-2">{{.Device.Name}}</h2>
+    <span hx-get="/devices/{{.Device.ID}}/_status" hx-trigger="load,every 3s"></span>
+</div>

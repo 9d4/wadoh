@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var versions = []func(*sql.Tx) error{upgradeV1}
+var versions = []func(*sql.Tx) error{upgradeV1, upgradeV2}
 
 func Upgrade(db *sql.DB) error {
 	version, err := getVersion(db)
@@ -102,6 +102,23 @@ func upgradeV1(tx *sql.Tx) error {
         linked_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES wadoh_users(id) ON DELETE RESTRICT
 	)`)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func upgradeV2(tx *sql.Tx) error {
+	_, err := tx.Exec(`CREATE TABLE wadoh_device_api_keys (
+	        id INT AUTO_INCREMENT PRIMARY KEY,
+		jid VARCHAR(255) NOT NULL,
+		name VARCHAR(255) NOT NULL,
+		token VARCHAR(255) NOT NULL,
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (jid) REFERENCES wadoh_devices(id) ON DELETE CASCADE,
+		UNIQUE idx_token (token)
+    )`)
 	if err != nil {
 		return err
 	}

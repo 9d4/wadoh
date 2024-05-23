@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog/log"
 	"github.com/skip2/go-qrcode"
 
 	"github.com/9d4/wadoh/devices"
@@ -27,20 +28,50 @@ func (d devicesPageData) DevicePath(dev devices.Device) string {
 }
 
 func (d devicesPageData) Edit(dev devices.Device) string {
-	return strings.ReplaceAll(webDevicesRenamePath, "{id}", dev.ID)
+	return strings.ReplaceAll(webDevicesPartialRenamePath, "{id}", dev.ID)
 }
 
 func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
+	ctx := chi.RouteContext(r.Context())
+	partialUrl := ""
+	switch ctx.RoutePattern() {
+	case webDevicesPath:
+		partialUrl = webDevicesPartialListPath
+	case webDevicesItemPath:
+		partialUrl = strings.Replace(webDevicesPartialItemPath, "{id}",
+			ctx.URLParam("id"), 1)
+	}
+
+	renderError(w, r, s.templates.Render(w, r, "dashboard/devices.html", map[string]string{
+		"PartialURL": partialUrl,
+	}))
+}
+
+func webDevicesPartialList(s *Server, w http.ResponseWriter, r *http.Request) {
 	user := userFromCtx(r.Context())
 	devices, err := s.storage.Devices.ListByOwnerID(user.ID)
-
 	if err != nil {
 		renderError(w, r, err)
 		return
 	}
-	renderError(w, r, s.templates.Render(w, r, "dashboard/devices.html", devicesPageData{
-		Devices: devices,
-	}))
+
+	s.templates.RenderPartial(w, "devices/list.html", html.NewPartialData().
+		Set("Devices", devices),
+	)
+}
+
+func webDevicesPartialItem(s *Server, w http.ResponseWriter, r *http.Request) {
+	user := userFromCtx(r.Context())
+	id := chi.RouteContext(r.Context()).URLParam("id")
+	dev, err := s.storage.Devices.GetByID(id)
+	if err != nil || user.ID != dev.OwnerID {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		log.Debug().Err(err).Send()
+		return
+	}
+	s.templates.RenderPartial(w, "devices/item.html", html.NewPartialData().
+		Set("Device", dev),
+	)
 }
 
 func webDevicesNew(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -140,7 +171,8 @@ func webDevicesConnectedHandle(s *Server, w http.ResponseWriter, r *http.Request
 func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
 	jid := chi.RouteContext(r.Context()).URLParam("id")
 	user := userFromCtx(r.Context())
-	status := "Unknown"
+	statusString := "Unknown"
+	status := pb.StatusResponse_STATUS_UNKNOWN
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -150,7 +182,8 @@ func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
 			Jid: jid,
 		})
 		if err == nil {
-			status = statusResponseToString(res)
+			statusString = statusResponseToString(res)
+			status = res.Status
 		}
 	}()
 
@@ -158,6 +191,7 @@ func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// TODO: handle in a better way
 		w.WriteHeader(http.StatusInternalServerError)
+		log.Debug().Err(err).Caller().Send()
 		return
 	}
 	if dev.OwnerID != user.ID {
@@ -166,7 +200,8 @@ func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
 	}
 
 	wg.Wait()
-	w.Write([]byte(status))
+	s.templates.RenderPartial(w, "devices/status.html", html.NewPartialData().
+		Set("Status", status).Set("StatusString", statusString))
 }
 
 func statusResponseToString(res *pb.StatusResponse) string {

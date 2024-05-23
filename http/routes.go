@@ -26,11 +26,14 @@ func initializeRoutes(s *Server) {
 			http.Redirect(w, r, webDevicesPath, http.StatusFound)
 		})
 		r.Get(webDevicesPath, handle(webDevices))
+		r.Get(webDevicesItemPath, handle(webDevices))
+		r.Get(webDevicesPartialListPath, handle(webDevicesPartialList))
+		r.Get(webDevicesPartialItemPath, handle(webDevicesPartialItem))
 		r.Get(webDevicesNewPath, handle(webDevicesNew))
 		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
-		r.Get(webDevicesGetStatusPath, handle(webDevicesGetStatus))
+		r.Get(webDevicesPartialGetStatusPath, handle(webDevicesGetStatus))
 
-		r.Get(webDevicesRenamePath, handle(webDevicesRename))
-		r.Put(webDevicesRenamePath, handle(webDevicesRenamePut))
+		r.Get(webDevicesPartialRenamePath, handle(webDevicesRename))
+		r.Put(webDevicesPartialRenamePath, handle(webDevicesRenamePut))
 	})
 }

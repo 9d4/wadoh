@@ -3,6 +3,7 @@ package mysqlstore
 import (
 	"database/sql"
 	"strings"
+	"time"
 
 	"github.com/9d4/wadoh/devices"
 )
@@ -36,7 +37,10 @@ func (s *devicesStore) ListByOwnerID(ownerID uint) ([]devices.Device, error) {
 }
 
 func (s *devicesStore) GetByID(id string) (*devices.Device, error) {
-	const query = `SELECT id, name, user_id, linked_at FROM wadoh_devices WHERE id=?`
+	const query = "SELECT devices.id, devices.name, devices.user_id, devices.linked_at, " +
+		"`keys`.id, `keys`.name, `keys`.token, `keys`.created_at FROM wadoh_devices devices " +
+		"LEFT JOIN wadoh_device_api_keys `keys` ON `keys`.jid=devices.id " +
+		"WHERE devices.id=?"
 
 	row := s.db.QueryRow(query, id)
 	if row.Err() != nil {
@@ -44,25 +48,63 @@ func (s *devicesStore) GetByID(id string) (*devices.Device, error) {
 	}
 
 	var dev devices.Device
-	if err := row.Scan(&dev.ID, &dev.Name, &dev.OwnerID, &dev.LinkedAt); err != nil {
+	var keyID *uint
+	var keyName, keyToken *string
+	var keyCreatedAt *time.Time
+
+	if err := row.Scan(&dev.ID, &dev.Name, &dev.OwnerID, &dev.LinkedAt,
+		&keyID, &keyName, &keyToken, &keyCreatedAt,
+	); err != nil {
 		return nil, err
 	}
+
+    if keyID != nil {
+        dev.ApiKey.ID = *keyID
+    }
+    if keyName != nil {
+        dev.ApiKey.Name = *keyName
+    }
+    if keyToken != nil {
+        dev.ApiKey.Token = *keyToken
+    }
+    if keyCreatedAt != nil {
+        dev.ApiKey.CreatedAt = *keyCreatedAt
+    }
+
 	return &dev, nil
 }
 
 func (s *devicesStore) Save(d *devices.Device) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
 	const query = `INSERT INTO wadoh_devices (id, name, user_id, linked_at) VALUES (?, ?, ?, ?)`
 
-	result, err := s.db.Exec(query, d.ID, d.Name, d.OwnerID, d.LinkedAt)
+	result, err := tx.Exec(query, d.ID, d.Name, d.OwnerID, d.LinkedAt)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 	_, err = result.RowsAffected()
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	return nil
+	result, err = tx.Exec(`INSERT INTO wadoh_device_api_keys (jid, name, token, created_at) VALUES (?, ?, ?, ?)`)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	_, err = result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (s *devicesStore) Patch(d *devices.Device) error {

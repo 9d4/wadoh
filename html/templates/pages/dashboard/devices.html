@@ -1,22 +1,3 @@
-{{define "content-title"}}Devices{{end}}
 {{define "content"}}
-<a class="btn btn-sm btn-secondary" href="/devices/new">Connect new device</a>
-<div class="my-10 grid grid-cols-1 gap-4">
-    {{ $data := .Data }}
-    {{- range .Data.Devices -}}
-    <div>
-        <span class="card bg-base-200 hover:shadow-md decoration-0">
-            <span class="card-body p-4">
-                <div class="card-title">
-                    {{- partial "devices/name.html" . -}}
-                    <span class="ms-auto badge" hx-get="{{ $data.DevicePath . }}/_status" hx-trigger="every 2s"></span>
-                </div>
-                <p class="text-sm opacity-80">
-                    Linked at <time datetime="{{.LinkedAt}}">{{.LinkedAt.Format "02 Jan 2006 15:04"}}</time>
-                </p>
-            </span>
-        </span>
-    </div>
-    {{- end -}}
-</div>
+<div hx-get='{{.Data.PartialURL}}' hx-trigger="load" id="devicesContainer"></div>
 {{end}}
