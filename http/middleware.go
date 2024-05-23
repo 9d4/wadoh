@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/jwtauth/v5"
@@ -18,10 +17,10 @@ func (s *Server) authenticated(next http.Handler) http.Handler {
 
 		redirectLoginPage := func() {
 			target := webLoginPath
-			if r.URL.Path != "/" {
-				target = target + fmt.Sprintf("?%s=%s", redirectContinueParam, r.URL.String())
-			}
-			http.Redirect(w, r, target, http.StatusFound)
+			//if r.URL.Path != "/" {
+			//	target = target + fmt.Sprintf("?%s=%s", redirectContinueParam, r.URL.String())
+			//}
+			webHTMXRedirect(w, r, target, http.StatusFound)
 		}
 
 		if err != nil {
@@ -54,7 +53,7 @@ func (s *Server) unAuthenticated(next http.Handler) http.Handler {
 		_, _, err := jwtauth.FromContext(r.Context())
 		if err == nil {
 			webHTMXRedirect(w, r, "/", http.StatusFound)
-			http.Redirect(w, r, "/", http.StatusFound)
+			return
 		}
 
 		next.ServeHTTP(w, r)

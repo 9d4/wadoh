@@ -6,9 +6,22 @@ import (
 )
 
 func webHTMXRedirect(w http.ResponseWriter, r *http.Request, path string, code int) {
-	if origin := r.Header.Get("Origin"); origin != "" {
-		u, err := url.Parse(origin)
+	hxRequest := r.Header.Get("HX-Request") == "true"
+	hasReferer := r.Header.Get("Referer") != ""
+	hasOrigin := r.Header.Get("Origin") != ""
+	if hxRequest && (hasReferer || hasOrigin) {
+		baseURL := ""
+		u, err := url.Parse(r.Header.Get("Referer"))
 		if err == nil {
+			baseURL = u.Host
+		} else {
+			u, err = url.Parse(r.Header.Get("Origin"))
+			if err == nil {
+				baseURL = u.Host
+			}
+		}
+
+		if baseURL != "" {
 			w.Header().Set("HX-Location", path)
 			w.Header().Set("HX-Push-Url", u.JoinPath(path).String())
 			w.WriteHeader(code)
@@ -16,6 +29,7 @@ func webHTMXRedirect(w http.ResponseWriter, r *http.Request, path string, code i
 		}
 	}
 
+	w.Header().Set("Location", path)
 	w.Header().Set("HX-Redirect", path)
 	w.Header().Set("HX-Refresh", "true")
 	w.WriteHeader(code)
