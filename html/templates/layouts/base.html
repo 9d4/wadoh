@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wadoh</title>
     <link rel="stylesheet" href="/static/dist/css/main.css" />
-  </head>
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="manifest" href="/static/site.webmanifest">
+</head>
 
-  <body>
+<body>
     {{if eq .Layout "base"}}
     <header class="navbar bg-base-200">
-      <div class="container mx-auto">
-        {{- block "navbar_before" . -}}{{- end -}}
-        <div class="flex-1">
-          <a class="text-xl font-semibold" href="/">Wadoh</a>
+        <div class="container mx-auto">
+            {{- block "navbar_before" . -}}{{- end -}}
+            <div class="flex-1">
+                <a class="text-xl font-semibold" href="/">Wadoh</a>
+            </div>
         </div>
-      </div>
     </header>
     {{- block "content" . -}} {{- end -}}
     {{end}}
@@ -23,5 +28,6 @@
     <script src="/static/htmx.min.js"></script>
     <script src="/static/htmx.ext.chunked-transfer.js"></script>
     <script type="module" src="/static/dist/js/main.js"></script>
-  </body>
+</body>
+
 </html>
