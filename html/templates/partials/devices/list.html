@@ -9,7 +9,7 @@
         <span class="card-body p-4">
             <div class="card-title">
                 {{- partial "devices/name.html" . -}}
-                <span class="ms-auto badge" hx-get="/devices/{{.ID}}/_status" hx-trigger="load,every 3s"></span>
+                <span class="ms-auto" hx-get="/devices/{{.ID}}/_status" hx-trigger="load,every 3s"></span>
             </div>
             <p class="text-sm opacity-80">
                 Linked at <time datetime="{{.LinkedAt}}">{{.LinkedAt.Format "02 Jan 2006 15:04"}}</time>
