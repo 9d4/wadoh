@@ -1,0 +1,12 @@
+<div id="partSendMessage">
+    <h4 class="font-bold">Try Send Message
+        <span id="formIndicator" class="htmx-indicator loading loading-dots loading-md"></span>
+    </h4>
+    <form id="devForm" class="my-4" hx-post="/devices/{{.Device.ID}}/send" hx-indicator="#formIndicator"
+        hx-target="#sendMessageResult">
+        <input type="tel" placeholder="+123000000" name="phone" class="mb-2 input input-bordered w-full" required />
+        <textarea class="mb-2 textarea textarea-bordered w-full" name="message" placeholder="Type message here"></textarea>
+        <button type="submit" class="block mt-3 btn btn-md btn-primary">Send Message</button>
+    </form>
+    <p id="sendMessageResult"></p>
+</div>

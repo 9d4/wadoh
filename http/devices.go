@@ -294,6 +294,37 @@ func webDevicesPartialAPIKeyGenerate(s *Server, w http.ResponseWriter, r *http.R
 		Set("Device", device))
 }
 
+func webDevicePartialSendMessage(s *Server, w http.ResponseWriter, r *http.Request) {
+	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	if err != nil {
+		http.Error(w, "unable to render this part", http.StatusOK)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+	s.templates.RenderPartial(w, "devices/send_message.html", html.
+		NewPartialData().Set("Device", device))
+}
+
+func webDevicePartialSendMessagePost(s *Server, w http.ResponseWriter, r *http.Request) {
+	phone := r.FormValue("phone")
+	message := r.FormValue("message")
+	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	if err != nil {
+		http.Error(w, "Permission Denied", http.StatusOK)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+
+	go func() {
+		s.pbCli.SendMessage(context.Background(), &pb.SendMessageRequest{
+			Jid:   device.ID,
+			Phone: phone,
+			Body:  message,
+		})
+	}()
+	w.Write([]byte("OK"))
+}
+
 func getDevice(s *Server, ctx context.Context, deviceID string) (*devices.Device, error) {
 	user := userFromCtx(ctx)
 	device, err := s.storage.Devices.GetByID(deviceID)

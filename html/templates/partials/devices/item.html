@@ -8,4 +8,5 @@
     <span hx-get="/devices/{{.Device.ID}}/_status" hx-trigger="load,every 3s"></span>
 </div>
 
-<div hx-get="/devices/{{.Device.ID}}/apikey" hx-trigger="load"></div>
+<section class="mb-5" hx-get="/devices/{{.Device.ID}}/apikey" hx-trigger="load"></section>
+<section class="mb-5" hx-get="/devices/{{.Device.ID}}/send" hx-trigger="load"></section>

@@ -37,10 +37,13 @@ func initializeRoutes(s *Server) {
 		r.Put(webDevicesPartialRenamePath, handle(webDevicesRenamePut))
 		r.Get(webDevicesPartialAPIKeyPath, handle(webDevicesPartialAPIKey))
 		r.Post(webDevicesPartialAPIKeyGenPath, handle(webDevicesPartialAPIKeyGenerate))
+
+		r.Post(webDevicesPartialSendMessagePostPath, handle(webDevicePartialSendMessagePost))
+        r.Get(webDevicesPartialSendMessagePath, handle(webDevicePartialSendMessage))
 	})
 
 	r.Group(func(r chi.Router) {
-        r.Use(s.apiAuthenticated)
+		r.Use(s.apiAuthenticated)
 		r.Post(apiDevicesSendMessagePath, handle(apiDevicesSendMessage))
 	})
 }

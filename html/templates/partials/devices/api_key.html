@@ -1,5 +1,5 @@
-<section class="prose" id="partApiKey">
-    <h4>API Key</h4>
+<div class="prose" id="partApiKey">
+    <h4 class="font-bold">API Key</h4>
     <button class="btn btn-sm" hx-post="/devices/{{.Device.ID}}/genkey" hx-target="#partApiKey"
         hx-confirm="This will invalidate current key. Continue?">Generate New</button>
     {{- if ne .Device.ApiKey.ID 0 -}}
@@ -7,4 +7,4 @@
     {{- else -}}
     <span>No Api Key</span>
     {{- end -}}
-</section>
+</div>
