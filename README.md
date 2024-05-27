@@ -36,5 +36,6 @@ http:
 storage:
   provider: mysql
   dsn: root:@tcp(localhost:3306)/wadoh?parseTime=true
+wadoh_be_address: localhost:50051
 ```
 Custom config path is also supported, use `-c` or `--config` to use custom config path.

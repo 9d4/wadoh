@@ -1,6 +1,8 @@
 log_level: -1 # see zerolog.Level for reference: https://github.com/rs/zerolog/?tab=readme-ov-file#leveled-logging
 http:
-  address: :8080
+  address: 0.0.0.0:8080
+  jwt_secret: abc
 storage:
   provider: mysql
   dsn: root:@tcp(localhost:3306)/wadoh?parseTime=true
+wadoh_be_address: localhost:50051

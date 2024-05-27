@@ -35,7 +35,7 @@ var rootCmd = &cobra.Command{
 	Use:   "wadoh",
 	Short: "Start wadoh web server",
 	Run: run(func(cmd *cobra.Command, args []string, storage *storage.Storage) {
-		conn, err := grpc.NewClient(global.WadohBeDSN, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		conn, err := grpc.NewClient(global.WadohBeAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		if err != nil {
 			log.Fatal().Err(err).Caller().Send()
 		}
