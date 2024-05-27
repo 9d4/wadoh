@@ -325,6 +325,21 @@ func webDevicePartialSendMessagePost(s *Server, w http.ResponseWriter, r *http.R
 	w.Write([]byte("OK"))
 }
 
+func webDeviceDelete(s *Server, w http.ResponseWriter, r *http.Request) {
+	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	if err != nil {
+		http.Error(w, "Permission Denied", http.StatusOK)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+	if err := s.storage.Devices.Delete(device.ID); err != nil {
+		webHTMXRedirect(w, r, webDevicesPath, http.StatusFound)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+	webHTMXRedirect(w, r, webDevicesPath, http.StatusFound)
+}
+
 func getDevice(s *Server, ctx context.Context, deviceID string) (*devices.Device, error) {
 	user := userFromCtx(ctx)
 	device, err := s.storage.Devices.GetByID(deviceID)

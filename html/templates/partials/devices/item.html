@@ -10,3 +10,14 @@
 
 <section class="mb-5" hx-get="/devices/{{.Device.ID}}/apikey" hx-trigger="load"></section>
 <section class="mb-5" hx-get="/devices/{{.Device.ID}}/send" hx-trigger="load"></section>
+<div class="my-5 border-red-400 border-solid border w-full p-3 rounded-box">
+    <div class="prose mb-3">
+        <h4 class="font-bold">Danger Area</h4>
+    </div>
+    <section class="prose">
+        <p>In case device is not connected anymore, you may delete it. But if
+            the device still connected, ensure to logout manually from you phone</p>
+        <button class="btn btn-sm btn-error" hx-delete="/devices/{{.Device.ID}}"
+            hx-confirm="You will need to logout manually after deletion. Continue?">Delete Device</button>
+    </section>
+</div>

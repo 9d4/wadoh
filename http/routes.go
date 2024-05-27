@@ -31,6 +31,7 @@ func initializeRoutes(s *Server) {
 		r.Get(webDevicesPartialItemPath, handle(webDevicesPartialItem))
 		r.Get(webDevicesNewPath, handle(webDevicesNew))
 		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
+		r.Delete(webDevicesDeletePath, handle(webDeviceDelete))
 
 		r.Get(webDevicesPartialGetStatusPath, handle(webDevicesGetStatus))
 		r.Get(webDevicesPartialRenamePath, handle(webDevicesRename))
@@ -39,7 +40,7 @@ func initializeRoutes(s *Server) {
 		r.Post(webDevicesPartialAPIKeyGenPath, handle(webDevicesPartialAPIKeyGenerate))
 
 		r.Post(webDevicesPartialSendMessagePostPath, handle(webDevicePartialSendMessagePost))
-        r.Get(webDevicesPartialSendMessagePath, handle(webDevicePartialSendMessage))
+		r.Get(webDevicesPartialSendMessagePath, handle(webDevicePartialSendMessage))
 	})
 
 	r.Group(func(r chi.Router) {

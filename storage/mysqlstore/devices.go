@@ -126,6 +126,14 @@ func (s *devicesStore) Patch(d *devices.Device) error {
 	return nil
 }
 
+func (s *devicesStore) Delete(jid string) error {
+	_, err := s.db.Exec(`DELETE FROM wadoh_devices WHERE id = ?`, jid)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *devicesStore) SaveAPIKey(key *devices.DeviceApiKey) error {
 	tx, err := s.db.Begin()
 	if err != nil {

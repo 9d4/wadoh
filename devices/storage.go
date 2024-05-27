@@ -11,6 +11,7 @@ type StorageProvider interface {
 	GetByID(string) (*Device, error)
 	Save(*Device) error
 	Patch(*Device) error
+	Delete(string) error
 	SaveAPIKey(*DeviceApiKey) error
 	GetByAPIToken(string) (*Device, error)
 }
@@ -42,6 +43,10 @@ func (s *Storage) Rename(id, newName string) error {
 		ID:   id,
 		Name: newName,
 	})
+}
+
+func (s *Storage) Delete(id string) error {
+	return s.provider.Delete(id)
 }
 
 func (s *Storage) GenNewDevAPIKey(deviceID string) error {
