@@ -44,6 +44,13 @@ func initializeRoutes(s *Server) {
 	})
 
 	r.Group(func(r chi.Router) {
+		r.Use(s.authenticatedAdmin)
+
+		r.Get(webUsersPath, handle(webUsers))
+		r.Get(webUsersRowsPath, handle(webUsersRows))
+	})
+
+	r.Group(func(r chi.Router) {
 		r.Use(s.apiAuthenticated)
 		r.Post(apiDevicesSendMessagePath, handle(apiDevicesSendMessage))
 	})

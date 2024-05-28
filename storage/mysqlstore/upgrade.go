@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var versions = []func(*sql.Tx) error{upgradeV1, upgradeV2}
+var versions = []func(*sql.Tx) error{upgradeV1, upgradeV2, upgradeV3}
 
 func Upgrade(db *sql.DB) error {
 	version, err := getVersion(db)
@@ -119,6 +119,32 @@ func upgradeV2(tx *sql.Tx) error {
 		FOREIGN KEY (jid) REFERENCES wadoh_devices(id) ON DELETE CASCADE,
 		UNIQUE idx_token (token)
     )`)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func upgradeV3(tx *sql.Tx) error {
+	_, err := tx.Exec(`CREATE TABLE wadoh_user_perms (
+        user_id INT NOT NULL,
+        admin TINYINT(1) NOT NULL DEFAULT 0,
+		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES wadoh_users(id) ON DELETE CASCADE
+    )`)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`INSERT INTO wadoh_user_perms (user_id)
+        SELECT wadoh_users.id
+        FROM wadoh_users
+        WHERE NOT EXISTS (
+            SELECT 1
+            FROM wadoh_user_perms
+            WHERE wadoh_user_perms.user_id = wadoh_users.id
+    );`)
 	if err != nil {
 		return err
 	}

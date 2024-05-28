@@ -61,3 +61,16 @@ func (s *Server) unAuthenticated(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(fn)
 }
+
+func (s *Server) authenticatedAdmin(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		user := userFromCtx(r.Context())
+		if !user.Perm.Admin {
+			http.Error(w, "You don't have permission to access the resource.", http.StatusForbidden)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}
+	return s.authenticated(http.HandlerFunc(fn))
+}

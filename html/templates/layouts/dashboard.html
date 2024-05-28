@@ -37,6 +37,9 @@
             </a>
             <ul class="menu p-4">
                 <li><a href="/devices">Devices</a></li>
+                {{if .User.Perm.Admin -}}
+                <li><a href="/users">Users</a></li>
+                {{- end }}
                 <li><a hx-post="/logout">Logout</a></li>
             </ul>
         </div>

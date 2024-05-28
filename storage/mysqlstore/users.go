@@ -2,6 +2,7 @@ package mysqlstore
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/9d4/wadoh/users"
 )
@@ -28,6 +29,12 @@ func (s *usersStore) GetByUsername(username string) (*users.User, error) {
 	if err := row.Scan(&u.ID, &u.Name, &u.Username, &u.Password, &u.CreatedAt); err != nil {
 		return nil, err
 	}
+
+	perm, err := s.firstOrInitPermission(u.ID)
+	if err != nil {
+		return nil, err
+	}
+	u.Perm = *perm
 
 	return &u, nil
 }
@@ -69,6 +76,29 @@ func (s *usersStore) Save(u *users.User) error {
 
 	u.ID = uint(id)
 	return nil
+}
+
+func (s *usersStore) firstOrInitPermission(userID uint) (*users.Permissions, error) {
+	row := s.db.QueryRow(
+		`SELECT admin, updated_at FROM wadoh_user_perms WHERE user_id=?`,
+		userID,
+	)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	var perm users.Permissions
+	if err := row.Scan(&perm.Admin, &perm.UpdatedAt); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			_, err := s.db.Exec(`INSERT INTO wadoh_user_perms(user_id) VALUES (?)`, userID)
+			if err != nil {
+				return nil, err
+			}
+			return &perm, nil
+		}
+		return nil, err
+	}
+	return &perm, nil
 }
 
 var _ users.StorageProvider = (*usersStore)(nil)

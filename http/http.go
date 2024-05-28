@@ -29,6 +29,9 @@ const (
 	webDevicesPartialSendMessagePath     = "/devices/{id}/send"
 	webDevicesPartialSendMessagePostPath = "/devices/{id}/send"
 
+	webUsersPath     = "/users"
+	webUsersRowsPath = "/users/rows"
+
 	apiDevicesSendMessagePath = "/api/devices/send-message"
 
 	userTokenCookieKey  = "jwt"

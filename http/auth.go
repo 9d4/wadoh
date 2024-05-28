@@ -13,7 +13,7 @@ import (
 )
 
 func webLogin(s *Server, w http.ResponseWriter, r *http.Request) {
-	renderError(w, r, s.templates.Render(w, r, "login.html", nil))
+	renderError(w, r, s.templates.Render(w, r, userFromCtx(r.Context()), "login.html", nil))
 }
 
 func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {

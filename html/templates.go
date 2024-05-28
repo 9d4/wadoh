@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/9d4/wadoh/users"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,12 +25,13 @@ func NewTemplates() *Templates {
 // Render searches page template in pages/ directory. It also applies base template
 // based on sub directory. Example of name dashboard/index.html will use base template
 // from layouts/dashboard.html if exists or fallback to default layouts/base.html.
-func (t *Templates) Render(w http.ResponseWriter, r *http.Request, name string, data interface{}) error {
+func (t *Templates) Render(w http.ResponseWriter, r *http.Request, user *users.User, name string, data interface{}) error {
 	name = strings.TrimPrefix(name, "/")
 	base, _ := t.base.Clone()
 	tmplData := &TemplateData{
 		Layout: strings.SplitN(base.Name(), ".", 2)[0],
 		Data:   data,
+		User:   user,
 	}
 
 	page, err := base.ParseFS(TemplatesFS(), "pages/"+name)
@@ -97,6 +99,7 @@ func partial(name string, data ...interface{}) template.HTML {
 type TemplateData struct {
 	Layout string
 	Data   interface{}
+	User   *users.User
 }
 
 type PartialData map[string]interface{}

@@ -43,7 +43,8 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 			ctx.URLParam("id"), 1)
 	}
 
-	renderError(w, r, s.templates.Render(w, r, "dashboard/devices.html", map[string]string{
+	renderError(w, r, s.templates.Render(w, r, userFromCtx(r.Context()), "dashboard/devices.html", map[string]interface{}{
+		"User":       userFromCtx(r.Context()),
 		"PartialURL": partialUrl,
 	}))
 }
@@ -76,7 +77,7 @@ func webDevicesPartialItem(s *Server, w http.ResponseWriter, r *http.Request) {
 }
 
 func webDevicesNew(s *Server, w http.ResponseWriter, r *http.Request) {
-	renderError(w, r, s.templates.Render(w, r, "dashboard/devices_new.html", nil))
+	renderError(w, r, s.templates.Render(w, r, userFromCtx(r.Context()), "dashboard/devices_new.html", nil))
 }
 
 func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {

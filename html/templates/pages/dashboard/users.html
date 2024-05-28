@@ -1,0 +1,22 @@
+{{define "content"}}
+<div class="prose">
+    <h2 class="mb-2">Manage Users</h2>
+</div>
+<div>
+    <div class="overflow-x-auto">
+        <table class="table">
+            <!-- head -->
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr hx-get="/users/rows/" hx-swap="outerHTML" hx-target="this" hx-trigger="load"></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{{end}}
