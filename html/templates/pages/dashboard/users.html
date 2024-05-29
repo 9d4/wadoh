@@ -14,7 +14,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr hx-get="/users/rows/" hx-swap="outerHTML" hx-target="this" hx-trigger="load"></tr>
+                {{render .Page.Rows}}
             </tbody>
         </table>
     </div>

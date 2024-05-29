@@ -8,10 +8,16 @@ import (
 )
 
 func webUsers(s *Server, w http.ResponseWriter, r *http.Request) {
-	if err := s.templates.Render(w, r, userFromCtx(r.Context()), "dashboard/users.html", nil); err != nil {
+	users, err := s.storage.Users.List(20, 0)
+	if err != nil {
 		renderError(w, r, err)
 		return
 	}
+
+	tmpl := &html.UsersTmpl{
+		Rows: &html.UsersRowsPartial{Users: users},
+	}
+	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -19,12 +25,13 @@ func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
 	if i, err := strconv.Atoi(r.URL.Query().Get("since")); err == nil {
 		since = i
 	}
-	usrs, err := s.storage.Users.List(20, since)
+	users, err := s.storage.Users.List(20, since)
 	if err != nil {
 		renderError(w, r, err)
 		return
 	}
 
-	s.templates.RenderPartial(w, "users/rows.html", html.NewPartialData().
-		Set("Users", usrs))
+	tmpl := &html.UsersRowsPartial{Users: users}
+
+	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
 }

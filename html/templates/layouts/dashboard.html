@@ -1,48 +1,51 @@
-{{ define "title" }}Dashboard{{ end}}
-<!--  -->
-{{ define "dashboard" -}}
-<div class="drawer lg:drawer-open">
-    <input id="drawer" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-content flex flex-col">
-        <div class="w-full navbar bg-base-300">
-            <div class="flex-none lg:hidden">
-                <label for="drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                        class="inline-block w-6 h-6 stroke-current">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </label>
+<!DOCTYPE html>
+<html lang="en">
+{{ template "head.html" . }}
+
+<body>
+    <div class="drawer lg:drawer-open">
+        <input id="drawer" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content flex flex-col">
+            <div class="w-full navbar bg-base-300">
+                <div class="flex-none lg:hidden">
+                    <label for="drawer" aria-label="open sidebar" class="btn btn-square btn-ghost">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            class="inline-block w-6 h-6 stroke-current">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </label>
+                </div>
+                <a class="flex-1 text-xl font-semibold px-2 mx-2" href="/">
+                    <img class="w-8 md:hidden" src="/static/wadoh.png">
+                    <span class="italic font-semibold">Wadoh</span>
+                </a>
+                <div class="flex-none hidden lg:block">
+                    <ul class="menu menu-horizontal">
+                        <!-- Navbar menu content here -->
+                    </ul>
+                </div>
             </div>
-            <a class="flex-1 text-xl font-semibold px-2 mx-2" href="/">
-                <img class="w-8 md:hidden" src="/static/wadoh.png">
-                <span class="italic font-semibold">Wadoh</span>
-            </a>
-            <div class="flex-none hidden lg:block">
-                <ul class="menu menu-horizontal">
-                    <!-- Navbar menu content here -->
+            <main class="container p-4">
+                {{template "content" .}}
+            </main>
+        </div>
+
+        <div class="drawer-side">
+            <label for="drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+            <div class="w-80 min-h-full bg-base-200 text-base-content">
+                <a class="block ps-8 pt-8" href="/">
+                    <img class="w-16" src="/static/wadoh.png">
+                </a>
+                <ul class="menu p-4">
+                    <li><a href="/devices">Devices</a></li>
+                    <li><a href="/users">Users</a></li>
+                    <li><a hx-post="/logout">Logout</a></li>
                 </ul>
             </div>
         </div>
-        <main class="container p-4">
-            {{template "content" .}}
-        </main>
     </div>
+    {{ template "js.html" . }}
+</body>
 
-    <div class="drawer-side">
-        <label for="drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-        <div class="w-80 min-h-full bg-base-200 text-base-content">
-            <a class="block ps-8 pt-8" href="/">
-                <img class="w-16" src="/static/wadoh.png">
-            </a>
-            <ul class="menu p-4">
-                <li><a href="/devices">Devices</a></li>
-                {{if .User.Perm.Admin -}}
-                <li><a href="/users">Users</a></li>
-                {{- end }}
-                <li><a hx-post="/logout">Logout</a></li>
-            </ul>
-        </div>
-    </div>
-</div>
-{{- end }}
+</html>

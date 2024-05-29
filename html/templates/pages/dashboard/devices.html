@@ -1,3 +1,6 @@
 {{define "content"}}
-<div hx-get='{{.Data.PartialURL}}' hx-trigger="load" id="devicesContainer"></div>
+<div hx-trigger="load" id="devicesContainer">
+    {{render .Page.List}}
+    {{render .Page.Detail}}
+</div>
 {{end}}

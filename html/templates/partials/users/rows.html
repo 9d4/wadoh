@@ -1,5 +1,5 @@
 {{- $lastID := 0 -}}
-{{- range .Users -}}
+{{- range .Page.Users -}}
 {{- $lastID = .ID -}}
 <tr>
     <td>{{.Name}}</td>

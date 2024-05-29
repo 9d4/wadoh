@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"path"
-	"strings"
 	"sync"
 	"time"
 
@@ -20,33 +18,40 @@ import (
 	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
-type devicesPageData struct {
-	Devices []devices.Device
-}
-
-func (d devicesPageData) DevicePath(dev devices.Device) string {
-	return path.Join(webDevicesPath, dev.ID)
-}
-
-func (d devicesPageData) Edit(dev devices.Device) string {
-	return strings.ReplaceAll(webDevicesPartialRenamePath, "{id}", dev.ID)
-}
-
 func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 	ctx := chi.RouteContext(r.Context())
-	partialUrl := ""
 	switch ctx.RoutePattern() {
 	case webDevicesPath:
-		partialUrl = webDevicesPartialListPath
-	case webDevicesItemPath:
-		partialUrl = strings.Replace(webDevicesPartialItemPath, "{id}",
-			ctx.URLParam("id"), 1)
-	}
+		user := userFromCtx(r.Context())
+		devices, err := s.storage.Devices.ListByOwnerID(user.ID)
+		if err != nil {
+			renderError(w, r, err)
+			return
+		}
 
-	renderError(w, r, s.templates.Render(w, r, userFromCtx(r.Context()), "dashboard/devices.html", map[string]interface{}{
-		"User":       userFromCtx(r.Context()),
-		"PartialURL": partialUrl,
-	}))
+		tmpl := &html.DevicesTmpl{
+			List: &html.DevicesListBlock{
+				Devices: devices,
+			},
+		}
+		renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+
+	case webDevicesItemPath:
+		id := chi.RouteContext(r.Context()).URLParam("id")
+		dev, err := getDevice(s, r.Context(), id)
+		if err != nil {
+			renderError(w, r, err)
+			return
+		}
+
+		tmpl := &html.DevicesTmpl{
+			List: nil,
+			Detail: &html.DevicesDetailBlock{
+				Device: dev,
+			},
+		}
+		renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+	}
 }
 
 func webDevicesPartialList(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -57,27 +62,31 @@ func webDevicesPartialList(s *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.templates.RenderPartial(w, "devices/list.html", html.NewPartialData().
-		Set("Devices", devices),
-	)
+	tmpl := &html.DevicesListBlock{
+		Devices: devices,
+	}
+
+	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesPartialItem(s *Server, w http.ResponseWriter, r *http.Request) {
-	user := userFromCtx(r.Context())
 	id := chi.RouteContext(r.Context()).URLParam("id")
-	dev, err := s.storage.Devices.GetByID(id)
-	if err != nil || user.ID != dev.OwnerID {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		log.Debug().Err(err).Send()
+	dev, err := getDevice(s, r.Context(), id)
+	if err != nil {
+		renderError(w, r, err)
 		return
 	}
-	s.templates.RenderPartial(w, "devices/item.html", html.NewPartialData().
-		Set("Device", dev),
-	)
+
+	tmpl := &html.DevicesDetailBlock{
+		Device: dev,
+	}
+
+	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesNew(s *Server, w http.ResponseWriter, r *http.Request) {
-	renderError(w, r, s.templates.Render(w, r, userFromCtx(r.Context()), "dashboard/devices_new.html", nil))
+	tmpl := &html.DevicesNewTmpl{}
+	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -204,8 +213,10 @@ func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
 	}
 
 	wg.Wait()
-	s.templates.RenderPartial(w, "devices/status.html", html.NewPartialData().
-		Set("Status", status).Set("StatusString", statusString))
+	s.templates.RenderPartial(w, "devices/status.html", map[string]interface{}{
+		"Status":       status,
+		"StatusString": statusString,
+	})
 }
 
 func statusResponseToString(res *pb.StatusResponse) string {
@@ -237,8 +248,10 @@ func webDevicesRename(s *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.templates.RenderPartial(w, "devices/rename.html",
-		html.NewPartialData().Set("ID", device.ID).Set("Name", device.Name))
+	s.templates.RenderPartial(w, "devices/rename.html", map[string]interface{}{
+		"ID":   device.ID,
+		"Name": device.Name,
+	})
 }
 
 func webDevicesRenamePut(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -264,8 +277,10 @@ func webDevicesRenamePut(s *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.templates.RenderPartial(w, "devices/name.html",
-		html.NewPartialData().Set("ID", device.ID).Set("Name", device.Name))
+	s.templates.RenderPartial(w, "devices/name.html", map[string]interface{}{
+		"ID":   device.ID,
+		"Name": device.Name,
+	})
 }
 
 func webDevicesPartialAPIKey(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -276,8 +291,7 @@ func webDevicesPartialAPIKey(s *Server, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	s.templates.RenderPartial(w, "devices/api_key.html", html.NewPartialData().
-		Set("Device", device))
+	s.templates.RenderPartial(w, "devices/api_key.html", map[string]interface{}{"Device": device})
 }
 
 func webDevicesPartialAPIKeyGenerate(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -291,8 +305,9 @@ func webDevicesPartialAPIKeyGenerate(s *Server, w http.ResponseWriter, r *http.R
 		log.Debug().Caller().Err(err).Send()
 	}
 	device, _ = getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
-	s.templates.RenderPartial(w, "devices/api_key.html", html.NewPartialData().
-		Set("Device", device))
+	s.templates.RenderPartial(w, "devices/api_key.html", map[string]interface{}{
+		"Device": device,
+	})
 }
 
 func webDevicePartialSendMessage(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -302,8 +317,9 @@ func webDevicePartialSendMessage(s *Server, w http.ResponseWriter, r *http.Reque
 		log.Debug().Caller().Err(err).Send()
 		return
 	}
-	s.templates.RenderPartial(w, "devices/send_message.html", html.
-		NewPartialData().Set("Device", device))
+	s.templates.RenderPartial(w, "devices/send_message.html", map[string]interface{}{
+		"Device": device,
+	})
 }
 
 func webDevicePartialSendMessagePost(s *Server, w http.ResponseWriter, r *http.Request) {

@@ -1,4 +1,3 @@
-{{define "content-title"}}Connect Device{{end}}
 {{define "content"}}
 <form id="devForm" class="my-4" hx-target="#pairContainer" hx-post="/devices/qr" hx-ext="chunked" hx-swap="innerHTML"
     hx-disabled-elt="#devForm *[type]" hx-request='{"credentials":true}'>

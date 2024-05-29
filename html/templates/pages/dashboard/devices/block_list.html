@@ -1,10 +1,11 @@
+{{define "body"}}
 <div class="prose">
     <h2 class="mb-2">Devices</h2>
 </div>
 <a class="btn btn-sm btn-secondary" href="/devices/new">Connect new device</a>
 <div class="my-10 grid grid-cols-1 gap-4">
     {{ $data := . }}
-    {{- range .Devices -}}
+    {{- range .Page.Devices -}}
     <div class="card bg-base-200 hover:shadow-md decoration-0">
         <span class="card-body p-4">
             <div class="card-title">
@@ -20,3 +21,4 @@
     </div>
     {{- end -}}
 </div>
+{{end}}

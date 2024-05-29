@@ -13,7 +13,8 @@ import (
 )
 
 func webLogin(s *Server, w http.ResponseWriter, r *http.Request) {
-	renderError(w, r, s.templates.Render(w, r, userFromCtx(r.Context()), "login.html", nil))
+	loginTmpl := &html.LoginTmpl{}
+	renderError(w, r, s.templates.R(r.Context(), w, loginTmpl))
 }
 
 func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -21,8 +22,7 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	password := r.PostFormValue("password")
 
 	sendErr := func() {
-		s.templates.RenderPartial(w, "login/error_msg.html",
-			html.NewPartialData().Set("message", "Credentials does not match our records."))
+		s.templates.RenderPartial(w, "login/error_msg.html", "Credentials does not match our records.")
 	}
 
 	user, err := s.storage.Users.GetBy(username)
