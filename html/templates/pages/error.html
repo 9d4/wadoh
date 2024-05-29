@@ -1,0 +1,14 @@
+{{define "content"}}
+<div class="max-w-md mx-auto mt-4 sm:mt-16 px-4">
+    <div class="card bg-base-300">
+        <div class="card-body prose">
+            <div class="card-title">
+                Something went wrong
+            </div>
+            <p class="mb-1">{{.Message}}</p>
+            <span class="opacity-50">{{.Code}}</span>
+            <a role="button" class="btn btn-ghost btn-sm" href="/">Go Home</a>
+        </div>
+    </div>
+</div>
+{{end}}
