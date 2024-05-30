@@ -5,7 +5,7 @@
 </a>
 <div class="prose mb-6">
     <h2 class="mb-2">{{.Page.Device.Name}}</h2>
-    <p class="mb-0">{{ devicePhone .Page.Device }}</p>
+    <p class="mb-0">{{.Page.Device.Phone}}</p>
     <span hx-get="/devices/{{.Page.Device.ID}}/_status" hx-trigger="load,every 3s"></span>
 </div>
 

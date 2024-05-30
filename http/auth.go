@@ -14,7 +14,7 @@ import (
 
 func webLogin(s *Server, w http.ResponseWriter, r *http.Request) {
 	loginTmpl := &html.LoginTmpl{}
-	renderError(w, r, s.templates.R(r.Context(), w, loginTmpl))
+	Error(w, r, s.templates.R(r.Context(), w, loginTmpl))
 }
 
 func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {

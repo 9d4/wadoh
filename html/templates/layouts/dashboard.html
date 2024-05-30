@@ -16,12 +16,15 @@
                         </svg>
                     </label>
                 </div>
-                <a class="flex-1 text-xl font-semibold px-2 mx-2" href="/">
-                    <img class="w-8 md:hidden" src="/static/wadoh.png">
-                    <span class="italic font-semibold">Wadoh</span>
-                </a>
+                <div class="flex-1 text-xl font-semibold">
+                    <a class="flex px-2 mx-2" href="/">
+                        <img class="w-8 md:hidden" src="/static/wadoh.png">
+                        <span class="italic font-semibold">Wadoh</span>
+                    </a>
+                </div>
                 <div class="flex-none hidden lg:block">
                     <ul class="menu menu-horizontal">
+                        <li>{{.User.Name}}</li>
                         <!-- Navbar menu content here -->
                     </ul>
                 </div>
@@ -39,9 +42,17 @@
                 </a>
                 <ul class="menu p-4">
                     <li><a href="/devices">Devices</a></li>
+                    {{if .User.Perm.Admin -}}
                     <li><a href="/users">Users</a></li>
-                    <li><a hx-post="/logout">Logout</a></li>
+                    {{- end}}
                 </ul>
+                <div class="card bg-base-100 mx-4">
+                    <div class="card-body">
+                        <p class="text-xl">{{.User.Name}}</p>
+                        <p class="mb-2 opacity-70">{{.User.Username}}</p>
+                        <button class="btn btn-sm me-auto" hx-post="/logout">Logout</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

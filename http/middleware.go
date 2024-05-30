@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/9d4/wadoh/users"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
@@ -40,7 +41,7 @@ func (s *Server) authenticated(next http.Handler) http.Handler {
 		}
 
 		r = r.WithContext(newCtxUserToken(r.Context(), token))
-		r = r.WithContext(newCtxUser(r.Context(), user))
+		r = r.WithContext(users.NewUserContext(r.Context(), user))
 
 		next.ServeHTTP(w, r)
 	}
@@ -64,7 +65,7 @@ func (s *Server) unAuthenticated(next http.Handler) http.Handler {
 
 func (s *Server) authenticatedAdmin(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		user := userFromCtx(r.Context())
+		user := users.UserFromContext(r.Context())
 		if !user.Perm.Admin {
 			http.Error(w, "You don't have permission to access the resource.", http.StatusForbidden)
 			return

@@ -10,14 +10,14 @@ import (
 func webUsers(s *Server, w http.ResponseWriter, r *http.Request) {
 	users, err := s.storage.Users.List(20, 0)
 	if err != nil {
-		renderError(w, r, err)
+		Error(w, r, err)
 		return
 	}
 
 	tmpl := &html.UsersTmpl{
-		Rows: &html.UsersRowsPartial{Users: users},
+		Rows: &html.UsersRowsBlock{Users: users},
 	}
-	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -27,11 +27,11 @@ func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
 	}
 	users, err := s.storage.Users.List(20, since)
 	if err != nil {
-		renderError(w, r, err)
+		Error(w, r, err)
 		return
 	}
 
-	tmpl := &html.UsersRowsPartial{Users: users}
+	tmpl := &html.UsersRowsBlock{Users: users}
 
-	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(w, r, s.templates.R(r.Context(), w, tmpl))
 }

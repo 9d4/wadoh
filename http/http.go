@@ -7,21 +7,23 @@ import (
 	"time"
 
 	"github.com/9d4/wadoh/devices"
-	"github.com/9d4/wadoh/users"
+	"github.com/9d4/wadoh/html"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/rs/zerolog/log"
 )
 
 const (
 	webLoginPath         = "/login"
 	webLogoutPostPath    = "/logout"
 	webDevicesPath       = "/devices"
-	webDevicesItemPath   = "/devices/{id}"
+	webDevicesDetailPath = "/devices/{id}"
 	webDevicesNewPath    = "/devices/new"
 	webDevicesQRPath     = "/devices/qr"
 	webDevicesDeletePath = "/devices/{id}"
 
-	webDevicesPartialListPath            = "/devices/list"
-	webDevicesPartialItemPath            = "/devices/item/{id}"
+	webDevicesBlockListPath   = "/devices/list"
+	webDevicesBlockDetailPath = "/devices/detail/{id}"
+
 	webDevicesPartialGetStatusPath       = "/devices/{id}/_status"
 	webDevicesPartialRenamePath          = "/devices/{id}/rename"
 	webDevicesPartialAPIKeyPath          = "/devices/{id}/apikey"
@@ -37,7 +39,6 @@ const (
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour
 
-	userCtxKey      ctxKey = "user"
 	userTokenCtxKey ctxKey = "userToken"
 	deviceCtxKey    ctxKey = "device"
 )
@@ -46,9 +47,14 @@ type ctxKey string
 
 type handler func(s *Server, w http.ResponseWriter, r *http.Request)
 
-func renderError(w http.ResponseWriter, r *http.Request, err error) {
+func Error(w http.ResponseWriter, r *http.Request, err error) {
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Debug().Caller().Err(err).Send()
+		tmpl := &html.ErrorTmpl{
+			Code:    "ISE",
+			Message: "Internal Server Error",
+		}
+		tmpl.Render(r.Context(), w)
 	}
 }
 
@@ -60,18 +66,6 @@ func userTokenFromCtx(ctx context.Context) jwt.Token {
 	tk, ok := ctx.Value(userTokenCtxKey).(jwt.Token)
 	if ok {
 		return tk
-	}
-	return nil
-}
-
-func newCtxUser(ctx context.Context, user *users.User) context.Context {
-	return context.WithValue(ctx, userCtxKey, user)
-}
-
-func userFromCtx(ctx context.Context) *users.User {
-	user, ok := ctx.Value(userCtxKey).(*users.User)
-	if ok {
-		return user
 	}
 	return nil
 }

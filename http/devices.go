@@ -15,6 +15,7 @@ import (
 
 	"github.com/9d4/wadoh/devices"
 	"github.com/9d4/wadoh/html"
+	"github.com/9d4/wadoh/users"
 	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
@@ -22,10 +23,10 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 	ctx := chi.RouteContext(r.Context())
 	switch ctx.RoutePattern() {
 	case webDevicesPath:
-		user := userFromCtx(r.Context())
+		user := users.UserFromContext(r.Context())
 		devices, err := s.storage.Devices.ListByOwnerID(user.ID)
 		if err != nil {
-			renderError(w, r, err)
+			Error(w, r, err)
 			return
 		}
 
@@ -34,13 +35,13 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 				Devices: devices,
 			},
 		}
-		renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+		Error(w, r, s.templates.R(r.Context(), w, tmpl))
 
-	case webDevicesItemPath:
+	case webDevicesDetailPath:
 		id := chi.RouteContext(r.Context()).URLParam("id")
 		dev, err := getDevice(s, r.Context(), id)
 		if err != nil {
-			renderError(w, r, err)
+			Error(w, r, err)
 			return
 		}
 
@@ -50,15 +51,15 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 				Device: dev,
 			},
 		}
-		renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+		Error(w, r, s.templates.R(r.Context(), w, tmpl))
 	}
 }
 
-func webDevicesPartialList(s *Server, w http.ResponseWriter, r *http.Request) {
-	user := userFromCtx(r.Context())
+func webDevicesBlockList(s *Server, w http.ResponseWriter, r *http.Request) {
+	user := users.UserFromContext(r.Context())
 	devices, err := s.storage.Devices.ListByOwnerID(user.ID)
 	if err != nil {
-		renderError(w, r, err)
+		Error(w, r, err)
 		return
 	}
 
@@ -66,14 +67,14 @@ func webDevicesPartialList(s *Server, w http.ResponseWriter, r *http.Request) {
 		Devices: devices,
 	}
 
-	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
-func webDevicesPartialItem(s *Server, w http.ResponseWriter, r *http.Request) {
+func webDevicesBlockDetail(s *Server, w http.ResponseWriter, r *http.Request) {
 	id := chi.RouteContext(r.Context()).URLParam("id")
 	dev, err := getDevice(s, r.Context(), id)
 	if err != nil {
-		renderError(w, r, err)
+		Error(w, r, err)
 		return
 	}
 
@@ -81,12 +82,12 @@ func webDevicesPartialItem(s *Server, w http.ResponseWriter, r *http.Request) {
 		Device: dev,
 	}
 
-	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesNew(s *Server, w http.ResponseWriter, r *http.Request) {
 	tmpl := &html.DevicesNewTmpl{}
-	renderError(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -94,7 +95,7 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 	cli, err := s.pbCli.RegisterDevice(r.Context(), &pb.RegisterDeviceRequest{Phone: phone, PushNotification: true})
 	if err != nil {
-		renderError(w, r, err)
+		Error(w, r, err)
 		return
 	}
 
@@ -167,7 +168,7 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 }
 
 func webDevicesConnectedHandle(s *Server, w http.ResponseWriter, r *http.Request, name, jid string) {
-	user := userFromCtx(r.Context())
+	user := users.UserFromContext(r.Context())
 
 	if err := s.storage.Devices.Save(&devices.Device{
 		ID:       jid,
@@ -183,7 +184,7 @@ func webDevicesConnectedHandle(s *Server, w http.ResponseWriter, r *http.Request
 
 func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
 	jid := chi.RouteContext(r.Context()).URLParam("id")
-	user := userFromCtx(r.Context())
+	user := users.UserFromContext(r.Context())
 	statusString := "Unknown"
 	status := pb.StatusResponse_STATUS_UNKNOWN
 
@@ -236,7 +237,7 @@ func statusResponseToString(res *pb.StatusResponse) string {
 
 func webDevicesRename(s *Server, w http.ResponseWriter, r *http.Request) {
 	jid := chi.RouteContext(r.Context()).URLParam("id")
-	user := userFromCtx(r.Context())
+	user := users.UserFromContext(r.Context())
 
 	device, err := s.storage.Devices.GetByID(jid)
 	if err != nil {
@@ -257,7 +258,7 @@ func webDevicesRename(s *Server, w http.ResponseWriter, r *http.Request) {
 func webDevicesRenamePut(s *Server, w http.ResponseWriter, r *http.Request) {
 	ctx := chi.RouteContext(r.Context())
 	jid := ctx.URLParam("id")
-	user := userFromCtx(r.Context())
+	user := users.UserFromContext(r.Context())
 	newName := r.FormValue("new_name")
 
 	device, err := s.storage.Devices.GetByID(jid)
@@ -358,7 +359,7 @@ func webDeviceDelete(s *Server, w http.ResponseWriter, r *http.Request) {
 }
 
 func getDevice(s *Server, ctx context.Context, deviceID string) (*devices.Device, error) {
-	user := userFromCtx(ctx)
+	user := users.UserFromContext(ctx)
 	device, err := s.storage.Devices.GetByID(deviceID)
 	if err != nil {
 		return nil, err

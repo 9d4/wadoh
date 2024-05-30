@@ -16,10 +16,11 @@ func (lt *LoginTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 			ParseFS(fs, "pages/login.html"),
 		)
 
-		return t.Execute(w, &pageData{
-			Site: site,
-			Page: lt,
-		})
+		data, err := buildPageData(ctx, site, lt)
+		if err != nil {
+			return err
+		}
+		return t.Execute(w, data)
 	}
 
 	return "base.html", fn

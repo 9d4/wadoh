@@ -1,5 +1,6 @@
+{{- define "body" -}}
 {{- $lastID := 0 -}}
-{{- range .Page.Users -}}
+{{- range .Users -}}
 {{- $lastID = .ID -}}
 <tr>
     <td>{{.Name}}</td>
@@ -14,4 +15,5 @@
         </button>
     </td>
 </tr>
+{{- end -}}
 {{- end -}}

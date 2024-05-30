@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"strings"
 	"time"
 )
 
@@ -13,6 +14,14 @@ type Device struct {
 	OwnerID  uint         `json:"owner_id"`
 	LinkedAt time.Time    `json:"linked_at"`
 	ApiKey   DeviceApiKey `json:"api_key"`
+}
+
+func (d Device) Phone() string {
+	s := strings.SplitN(d.ID, ":", 2)
+	if len(s) == 2 {
+		return s[0]
+	}
+	return d.ID
 }
 
 type DeviceApiKey struct {
