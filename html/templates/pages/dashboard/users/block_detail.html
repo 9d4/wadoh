@@ -1,0 +1,67 @@
+{{define "body"}}
+{{ with .Flash }}
+<div role="alert" class="mb-2 alert alert-info">
+    <span>{{.}}</span>
+</div>
+{{ end }}
+<a href="/users" class="font-semibold cursor-pointer text-primary">
+    Users
+</a>
+<div class="prose mb-6">
+    <h2 class="mb-2">Edit User</h2>
+</div>
+<div class="card bg-base-300">
+    <div class="card-body">
+        {{ with .Page.User -}}
+        <form method="post">
+            <label class="form-control">
+                <div class="label">
+                    <span class="label-text">Name</span>
+                </div>
+                <input class="input input-sm mb-2" type="text" name="name" value="{{.Name}}">
+            </label>
+            <label class="form-control">
+                <div class="label">
+                    <span class="label-text">Username</span>
+                </div>
+                <input class="input input-sm mb-2" type="text" name="username" value="{{.Username}}">
+            </label>
+            <label class="form-control">
+                <div class="label">
+                    <span class="label-text">Password</span>
+                    <span class="label-text">Empty remains unchanged</span>
+                </div>
+                <input class="input input-sm mb-2" type="password" name="password">
+            </label>
+
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <!-- head -->
+                    <thead>
+                        <tr>
+                            <th>Permission</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Admin</td>
+                            <td>
+                                <label>
+                                    <input name="perm.admin" {{if .Perm.Admin}}checked{{end}} type="checkbox"
+                                        class="checkbox" />
+                                </label>
+                            </td>
+                        </tr>
+                </table>
+            </div>
+
+            <div class="flex">
+                <a class="btn btn-sm btn-error flex me-auto" hx-delete="/users/{{.ID}}" hx-confirm="Are you sure you wish to delete your account?">DELETE</a>
+                <button type="submit" class="btn btn-sm btn-primary ms-auto">Update</button>
+            </div>
+        </form>
+        {{- end }}
+    </div>
+</div>
+{{end}}

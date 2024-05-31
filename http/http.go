@@ -31,8 +31,10 @@ const (
 	webDevicesPartialSendMessagePath     = "/devices/{id}/send"
 	webDevicesPartialSendMessagePostPath = "/devices/{id}/send"
 
-	webUsersPath     = "/users"
-	webUsersRowsPath = "/users/rows"
+	webUsersPath       = "/users"
+	webUsersEditPath   = "/users/{id}"
+	webUsersDeletePath = "/users/{id}"
+	webUsersRowsPath   = "/users/rows"
 
 	apiDevicesSendMessagePath = "/api/devices/send-message"
 

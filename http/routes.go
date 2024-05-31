@@ -47,8 +47,11 @@ func initializeRoutes(s *Server) {
 		r.Use(s.authenticatedAdmin)
 
 		r.Get(webUsersPath, handle(webUsers))
-		r.Get(webUsersRowsPath, handle(webUsersRows))
-		r.Post(webUsersPath, handle(webUsersAdd))
+        r.Get(webUsersRowsPath, handle(webUsersRows))
+        r.Post(webUsersPath, handle(webUsersAdd))
+		r.Get(webUsersEditPath, handle(webUsersEdit))
+		r.Post(webUsersEditPath, handle(webUsersEditPost))
+		r.Delete(webUsersDeletePath, handle(webUsersDelete))
 	})
 
 	r.Group(func(r chi.Router) {

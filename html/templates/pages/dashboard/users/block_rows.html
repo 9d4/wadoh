@@ -20,7 +20,9 @@
         </svg>
         {{- end -}}
     </td>
-    <td></td>
+    <td>
+        <a href="/users/{{.ID}}" class="btn btn-xs btn-ghost">Detail</a>
+    </td>
 </tr>
 {{- end -}}
 {{- if ne $lastID 0 -}}

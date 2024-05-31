@@ -17,8 +17,24 @@ func newUsersStore(db *sql.DB) *usersStore {
 	return &usersStore{db: db}
 }
 
-func (s *usersStore) GetByID(uint) (*users.User, error) {
-	panic("not implemented")
+func (s *usersStore) GetByID(id uint) (*users.User, error) {
+	row := s.db.QueryRow(`SELECT * FROM wadoh_users WHERE id=?`, id)
+	if row.Err() != nil {
+		return nil, row.Err()
+	}
+
+	var u users.User
+	if err := row.Scan(&u.ID, &u.Name, &u.Username, &u.Password, &u.CreatedAt); err != nil {
+		return nil, err
+	}
+
+	perm, err := s.firstOrInitPermission(u.ID)
+	if err != nil {
+		return nil, err
+	}
+	u.Perm = *perm
+
+	return &u, nil
 }
 
 func (s *usersStore) GetByUsername(username string) (*users.User, error) {
@@ -112,6 +128,55 @@ func (s *usersStore) Save(u *users.User) error {
 
 	u.ID = uint(id)
 	return tx.Commit()
+}
+
+func (s *usersStore) Update(u *users.User) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	const userQ = "UPDATE wadoh_users " +
+		"SET name=?,username=?,password=? " +
+		"WHERE id=?"
+	_, err = tx.Exec(userQ, u.Name, u.Username, u.Password, u.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	const permQ = "UPDATE wadoh_user_perms " +
+		"SET admin=?,updated_at=? " +
+		"WHERE user_id=?"
+	_, err = tx.Exec(permQ, u.Perm.Admin, u.Perm.UpdatedAt, u.ID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (s *usersStore) Delete(id uint) error {
+    tx, err := s.db.Begin()
+    if err != nil {
+        return err
+    }
+
+    const deviceQ = "DELETE FROM wadoh_devices WHERE user_id=?"
+    _, err = tx.Exec(deviceQ, id)
+    if err != nil {
+        tx.Rollback()
+        return err
+    }
+
+    const userQ = "DELETE FROM wadoh_users WHERE id=?"
+    _, err = tx.Exec(userQ, id)
+    if err != nil {
+        tx.Rollback()
+        return err
+    }
+    return tx.Commit()
 }
 
 func (s *usersStore) firstOrInitPermission(userID uint) (*users.Permissions, error) {

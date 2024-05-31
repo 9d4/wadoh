@@ -1,46 +1,6 @@
 {{define "content"}}
-{{ with .Flash }}
-<div role="alert" class="mb-2 alert alert-info">
-    <span>{{.}}</span>
+<div id="usersContainer">
+    {{render .Page.List}}
+    {{render .Page.Detail}}
 </div>
-{{ end }}
-<div class="prose mb-6">
-    <h2 class="mb-2">Manage Users</h2>
-    <button class="btn btn-sm btn-primary" onclick="modal_new.showModal()">Add User</button>
-</div>
-<div>
-    <div class="overflow-x-auto">
-        <table class="table">
-            <!-- head -->
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Username</th>
-                    <th>Admin</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {{render .Page.Rows}}
-            </tbody>
-        </table>
-    </div>
-</div>
-<dialog id="modal_new" class="modal">
-    <div class="modal-box modal-top">
-        <h3 class="font-bold text-lg">Add User</h3>
-
-        <form method="post" class="form-control my-4">
-            <input type="name" placeholder="Name" name="name" class="mb-2 input input-bordered w-full" required />
-            <input type="username" placeholder="Username" name="username" class="mb-2 input input-bordered w-full"
-                required />
-            <input type="password" placeholder="Password" name="password" class="mb-2 input input-bordered w-full"
-                required />
-            <button type="submit" class="btn btn-primary btn-sm ms-auto mt-2">Create</button>
-        </form>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-        <button>close</button>
-    </form>
-</dialog>
 {{end}}
