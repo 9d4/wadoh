@@ -51,6 +51,7 @@ func (s *Storage) Save(u *User) (err error) {
 	u.Username = strings.TrimSpace(u.Username)
 	u.Password = strings.TrimSpace(u.Password)
 	u.CreatedAt = time.Now()
+    u.Perm.UpdatedAt = time.Now()
 
 	if u.Username == "" {
 		return errors.New("username should not be empty")
