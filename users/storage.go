@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -49,6 +50,7 @@ func (s *Storage) Save(u *User) (err error) {
 	u.Name = strings.TrimSpace(u.Name)
 	u.Username = strings.TrimSpace(u.Username)
 	u.Password = strings.TrimSpace(u.Password)
+	u.CreatedAt = time.Now()
 
 	if u.Username == "" {
 		return errors.New("username should not be empty")
