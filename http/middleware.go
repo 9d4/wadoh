@@ -22,6 +22,9 @@ func (s *Server) authenticated(next http.Handler) http.Handler {
 			//if r.URL.Path != "/" {
 			//	target = target + fmt.Sprintf("?%s=%s", redirectContinueParam, r.URL.String())
 			//}
+            
+            // this prevents from infinite redirect
+			setUserTokenCookie(w, nil, "")
 			webHTMXRedirect(w, r, target, http.StatusFound)
 		}
 

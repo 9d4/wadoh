@@ -74,6 +74,13 @@ func createUserToken(tokenAuth *jwtauth.JWTAuth, u *users.User) (token jwt.Token
 }
 
 func setUserTokenCookie(w http.ResponseWriter, token jwt.Token, tokenString string) {
+	if token == nil {
+		http.SetCookie(w, &http.Cookie{
+			Name:   userTokenCookieKey,
+			MaxAge: -1,
+		})
+		return
+	}
 	cookie := &http.Cookie{
 		Name:     userTokenCookieKey,
 		Value:    tokenString,
