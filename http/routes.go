@@ -48,6 +48,7 @@ func initializeRoutes(s *Server) {
 
 		r.Get(webUsersPath, handle(webUsers))
 		r.Get(webUsersRowsPath, handle(webUsersRows))
+		r.Post(webUsersPath, handle(webUsersAdd))
 	})
 
 	r.Group(func(r chi.Router) {

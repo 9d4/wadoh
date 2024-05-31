@@ -88,3 +88,12 @@ func parseJSON(r *http.Request, to any) error {
 	}
 	return nil
 }
+
+func SetFlash(w http.ResponseWriter, value string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "flash",
+		Value:    value,
+		Path:     "/",
+		HttpOnly: true,
+	})
+}

@@ -60,6 +60,7 @@ func NewServer(storage *storage.Storage, pbCli pb.ControllerServiceClient, opts 
 	s.router.Use(middleware.StripSlashes)
 	s.router.Use(jwtauth.Verifier(s.tokenAuth))
 	s.router.Use(middleware.RealIP)
+	s.router.Use(loadFlash)
 	initializeRoutes(s)
 
 	s.server.Handler = http.HandlerFunc(s.serveHTTP)

@@ -17,6 +17,7 @@ type ctxKey string
 
 const (
 	contextCtxKey ctxKey = "context"
+	flashCtxKey   ctxKey = "flash"
 )
 
 type Site struct {
@@ -79,6 +80,7 @@ func buildPageData(ctx context.Context, site *Site, data any) (map[string]interf
 	out["Page"] = maps.Clone(out)
 	out["Site"] = site
 	out["User"] = users.UserFromContext(ctx)
+	out["Flash"] = FlashFromContext(ctx)
 
 	return out, nil
 }

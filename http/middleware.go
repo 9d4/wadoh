@@ -3,6 +3,7 @@ package http
 import (
 	"net/http"
 
+	"github.com/9d4/wadoh/html"
 	"github.com/9d4/wadoh/users"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -74,4 +75,16 @@ func (s *Server) authenticatedAdmin(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	}
 	return s.authenticated(http.HandlerFunc(fn))
+}
+
+func loadFlash(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		if c, err := r.Cookie("flash"); err == nil && c.Value != "" {
+			r = r.WithContext(html.NewFlashContext(r.Context(), c.Value))
+			SetFlash(w, "")
+		}
+
+		next.ServeHTTP(w, r)
+	}
+	return http.HandlerFunc(fn)
 }
