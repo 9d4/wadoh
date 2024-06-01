@@ -20,11 +20,14 @@ type Templates struct {
 }
 
 func NewTemplates() *Templates {
+	site := &Site{
+		Title: "Wadoh",
+	}
 	fs := TemplatesFS()
 	tmpl := template.Must(
 		template.ParseFS(fs, "templates/*.html"),
 	).
-		Funcs(commonFuncs(fs))
+		Funcs(commonFuncs(fs, site))
 
 	layouts := make(map[string]*template.Template)
 	layoutNames := []string{"empty.html", "base.html", "dashboard.html"}
@@ -40,11 +43,9 @@ func NewTemplates() *Templates {
 	layouts[""] = layouts["empty.html"]
 
 	return &Templates{
-		layouts: layouts,
-		fs:      fs,
-		siteData: &Site{
-			Title: "Wadoh",
-		},
+		layouts:  layouts,
+		fs:       fs,
+		siteData: site,
 	}
 }
 
@@ -87,7 +88,7 @@ func (t *Templates) RenderPartial(w io.Writer, name string, data interface{}) er
 	if err != nil {
 		return err
 	}
-	page.Funcs(commonFuncs(t.fs))
+	page.Funcs(commonFuncs(t.fs, t.siteData))
 
 	if err := page.Execute(w, data); err != nil {
 		return err
@@ -121,9 +122,10 @@ func prepareRenderer(
 	return tmpl, tmpData, nil
 }
 
-func commonFuncs(fs fs.FS) template.FuncMap {
+func commonFuncs(fs fs.FS, s *Site) template.FuncMap {
 	funcs := template.FuncMap{}
 	funcs["partial"] = fnPartialRenderer(fs)
+	funcs["title"] = fnTitle(s)
 	return funcs
 }
 
@@ -156,6 +158,30 @@ func fnHTMLRenderer(ctx context.Context, t *Templates) func(r Renderable) templa
 			return template.HTML(err.Error())
 		}
 		return template.HTML(buf.String())
+	}
+
+	return fn
+}
+
+// fnTitle makes possible to page title by combining Site.Title
+// with current Page title if exists.
+//
+// this is useful to send new title on HTMX Ajax.
+// See html/templates/pages/dashboard/devices/block_detail.html for example.
+func fnTitle(s *Site) func(data map[string]interface{}) template.HTML {
+	fn := func(data map[string]interface{}) template.HTML {
+		title := s.Title
+		page, ok := data["Page"].(map[string]interface{})
+		if !ok {
+			return template.HTML(title)
+		}
+		pageTitle, ok := page["Title"].(string)
+		if !ok {
+			return template.HTML(title)
+		}
+
+		title = fmt.Sprintf("%s - %s", pageTitle, title)
+		return template.HTML(title)
 	}
 
 	return fn

@@ -2,6 +2,7 @@ package html
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -10,11 +11,17 @@ import (
 )
 
 type UsersTmpl struct {
+	Title  string
 	List   *UsersListBlock
 	Detail *UsersDetailBlock
 }
 
 func (t *UsersTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+	t.Title = "Manage Users"
+	if t.Detail != nil {
+		t.Title = fmt.Sprintf("user:%s", t.Detail.User.Username)
+	}
+
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
 		tmp, data, err := prepareRenderer(
 			ctx, fs, site, base,

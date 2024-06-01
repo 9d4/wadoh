@@ -2,6 +2,7 @@ package html
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -10,11 +11,17 @@ import (
 )
 
 type DevicesTmpl struct {
+	Title  string
 	List   *DevicesListBlock
 	Detail *DevicesDetailBlock
 }
 
 func (t *DevicesTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+	t.Title = "Devices"
+	if t.Detail != nil {
+		t.Title = fmt.Sprintf("%s - %s", t.Detail.Device.Name, site.Title)
+	}
+
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
 		tmpl, data, err := prepareRenderer(
 			ctx, fs, site, base,
@@ -30,10 +37,13 @@ func (t *DevicesTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 }
 
 type DevicesListBlock struct {
+	Title   string
 	Devices []devices.Device
 }
 
 func (b *DevicesListBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+	b.Title = "Devices"
+
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
 		tmpl, data, err := prepareRenderer(
 			ctx, fs, site, base,
@@ -49,10 +59,13 @@ func (b *DevicesListBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 }
 
 type DevicesDetailBlock struct {
+	Title  string
 	Device *devices.Device
 }
 
 func (b *DevicesDetailBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+	b.Title = b.Device.Name
+
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
 		tmpl, data, err := prepareRenderer(
 			ctx, fs, site, base,

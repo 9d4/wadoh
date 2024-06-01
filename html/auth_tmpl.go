@@ -8,9 +8,12 @@ import (
 )
 
 type LoginTmpl struct {
+    Title string
 }
 
 func (lt *LoginTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+    lt.Title = "Login"
+
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
 		t := template.Must(base.
 			ParseFS(fs, "pages/login.html"),
