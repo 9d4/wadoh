@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/9d4/wadoh/users"
-	"github.com/rs/zerolog/log"
 )
 
 type usersStore struct {
@@ -64,7 +63,6 @@ func (s *usersStore) Page(limit int, after int) ([]users.User, error) {
 		"LEFT JOIN wadoh_user_perms AS p ON p.user_id = u.id " +
 		"WHERE id > ? LIMIT ?"
 
-	log.Printf("%q", query)
 	rows, err := s.db.Query(query, after, limit)
 	if err != nil {
 		return nil, err
@@ -158,25 +156,25 @@ func (s *usersStore) Update(u *users.User) error {
 }
 
 func (s *usersStore) Delete(id uint) error {
-    tx, err := s.db.Begin()
-    if err != nil {
-        return err
-    }
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
 
-    const deviceQ = "DELETE FROM wadoh_devices WHERE user_id=?"
-    _, err = tx.Exec(deviceQ, id)
-    if err != nil {
-        tx.Rollback()
-        return err
-    }
+	const deviceQ = "DELETE FROM wadoh_devices WHERE user_id=?"
+	_, err = tx.Exec(deviceQ, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
-    const userQ = "DELETE FROM wadoh_users WHERE id=?"
-    _, err = tx.Exec(userQ, id)
-    if err != nil {
-        tx.Rollback()
-        return err
-    }
-    return tx.Commit()
+	const userQ = "DELETE FROM wadoh_users WHERE id=?"
+	_, err = tx.Exec(userQ, id)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	return tx.Commit()
 }
 
 func (s *usersStore) firstOrInitPermission(userID uint) (*users.Permissions, error) {
