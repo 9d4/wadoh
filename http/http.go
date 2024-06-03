@@ -21,14 +21,13 @@ const (
 	webDevicesQRPath     = "/devices/qr"
 	webDevicesDeletePath = "/devices/{id}"
 
-	webDevicesBlockListPath   = "/devices/list"
-	webDevicesBlockDetailPath = "/devices/detail/{id}"
+	webDevicesBlockListPath       = "/devices/list"
+	webDevicesBlockDetailPath     = "/devices/detail/{id}"
+	webDevicesBlockDetailPanePath = "/devices/detail/{id}/pane"
 
 	webDevicesPartialGetStatusPath       = "/devices/{id}/_status"
 	webDevicesPartialRenamePath          = "/devices/{id}/rename"
-	webDevicesPartialAPIKeyPath          = "/devices/{id}/apikey"
 	webDevicesPartialAPIKeyGenPath       = "/devices/{id}/genkey"
-	webDevicesPartialSendMessagePath     = "/devices/{id}/send"
 	webDevicesPartialSendMessagePostPath = "/devices/{id}/send"
 
 	webUsersPath       = "/users"

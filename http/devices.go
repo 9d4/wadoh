@@ -44,11 +44,17 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 			Error(w, r, err)
 			return
 		}
+		queryTab := r.URL.Query().Get("tab")
 
 		tmpl := &html.DevicesTmpl{
-			List: nil,
 			Detail: &html.DevicesDetailBlock{
 				Device: dev,
+				DetailPane: &html.DevicesDetailPaneBlock{
+					Device:        dev,
+					SubAPIKey:     queryTab == "api",
+					SubTryMessage: queryTab == "try_message",
+					SubMore:       queryTab == "more",
+				},
 			},
 		}
 		Error(w, r, s.templates.R(r.Context(), w, tmpl))
@@ -77,9 +83,35 @@ func webDevicesBlockDetail(s *Server, w http.ResponseWriter, r *http.Request) {
 		Error(w, r, err)
 		return
 	}
+	queryTab := r.URL.Query().Get("tab")
 
 	tmpl := &html.DevicesDetailBlock{
 		Device: dev,
+		DetailPane: &html.DevicesDetailPaneBlock{
+			Device:        dev,
+			SubAPIKey:     queryTab == "api",
+			SubTryMessage: queryTab == "try_message",
+			SubMore:       queryTab == "more",
+		},
+	}
+
+	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+}
+
+func webDevicesBlockDetailPane(s *Server, w http.ResponseWriter, r *http.Request) {
+	id := chi.RouteContext(r.Context()).URLParam("id")
+	dev, err := getDevice(s, r.Context(), id)
+	if err != nil {
+		Error(w, r, err)
+		return
+	}
+	queryTab := r.URL.Query().Get("tab")
+
+	tmpl := &html.DevicesDetailPaneBlock{
+		Device:        dev,
+		SubAPIKey:     queryTab == "api",
+		SubTryMessage: queryTab == "try_message",
+		SubMore:       queryTab == "more",
 	}
 
 	Error(w, r, s.templates.R(r.Context(), w, tmpl))
@@ -284,17 +316,6 @@ func webDevicesRenamePut(s *Server, w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func webDevicesPartialAPIKey(s *Server, w http.ResponseWriter, r *http.Request) {
-	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
-	if err != nil {
-		http.Error(w, "unable to render this part", http.StatusOK)
-		log.Debug().Caller().Err(err).Send()
-		return
-	}
-
-	s.templates.RenderPartial(w, "devices/api_key.html", map[string]interface{}{"Device": device})
-}
-
 func webDevicesPartialAPIKeyGenerate(s *Server, w http.ResponseWriter, r *http.Request) {
 	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
 	if err != nil {
@@ -306,21 +327,7 @@ func webDevicesPartialAPIKeyGenerate(s *Server, w http.ResponseWriter, r *http.R
 		log.Debug().Caller().Err(err).Send()
 	}
 	device, _ = getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
-	s.templates.RenderPartial(w, "devices/api_key.html", map[string]interface{}{
-		"Device": device,
-	})
-}
-
-func webDevicePartialSendMessage(s *Server, w http.ResponseWriter, r *http.Request) {
-	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
-	if err != nil {
-		http.Error(w, "unable to render this part", http.StatusOK)
-		log.Debug().Caller().Err(err).Send()
-		return
-	}
-	s.templates.RenderPartial(w, "devices/send_message.html", map[string]interface{}{
-		"Device": device,
-	})
+	s.templates.RenderPartial(w, "devices/api_key.html", device)
 }
 
 func webDevicePartialSendMessagePost(s *Server, w http.ResponseWriter, r *http.Request) {

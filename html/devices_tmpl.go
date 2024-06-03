@@ -2,7 +2,6 @@ package html
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -19,7 +18,7 @@ type DevicesTmpl struct {
 func (t *DevicesTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 	t.Title = "Devices"
 	if t.Detail != nil {
-		t.Title = fmt.Sprintf("%s - %s", t.Detail.Device.Name, site.Title)
+		t.Title = t.Detail.Device.Name
 	}
 
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
@@ -59,8 +58,9 @@ func (b *DevicesListBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 }
 
 type DevicesDetailBlock struct {
-	Title  string
-	Device *devices.Device
+	Title      string
+	Device     *devices.Device
+	DetailPane *DevicesDetailPaneBlock
 }
 
 func (b *DevicesDetailBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
@@ -97,4 +97,33 @@ func (t *DevicesNewTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 	}
 
 	return "dashboard.html", fn
+}
+
+type DevicesDetailPaneBlock struct {
+	Device *devices.Device
+
+	SubAPIKey     bool
+	SubTryMessage bool
+	SubMore       bool
+}
+
+func (t *DevicesDetailPaneBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
+		// set default pane if none true
+		if !t.SubAPIKey && !t.SubTryMessage && !t.SubMore {
+			t.SubAPIKey = true
+		}
+
+		tmp := template.Must(base.
+			ParseFS(fs, "pages/dashboard/devices/block_detail_pane.html"),
+		)
+
+		data, err := buildPageData(ctx, site, t)
+		if err != nil {
+			return err
+		}
+		return tmp.Execute(w, data)
+	}
+
+	return "", fn
 }

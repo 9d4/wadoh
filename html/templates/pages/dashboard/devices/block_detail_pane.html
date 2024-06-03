@@ -1,0 +1,58 @@
+{{ define "body" -}}
+{{ $activeClass := "block border-b-2 pb-3 border-b-accent w-8/12 mx-auto" }}
+{{ $normalClass := "block pb-3 w-8/12 mx-auto" }}
+<div id="detailPane" hx-target="this" hx-swap="outerHTML">
+    <div role="tablist" class="tabs tabs-lg w-fit">
+        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=api" hx-push-url="?tab=api"
+            class="tab p-0 rounded-xl text-accent font-bold">
+            <span class="w-fit">
+                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">API Key</span>
+                {{ if .SubAPIKey -}}
+                <span class="{{$activeClass}}"></span>
+                {{- else -}}
+                <span class="{{$normalClass}}"></span>
+                {{- end }}
+            </span>
+        </a>
+        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=try_message"
+            hx-push-url="?tab=try_message" class="tab p-0 rounded-xl text-accent font-bold">
+            <span class="w-fit">
+                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">Try Message</span>
+                {{ if .SubTryMessage -}}
+                <span class="{{$activeClass}}"></span>
+                {{- else -}}
+                <span class="{{$normalClass}}"></span>
+                {{- end }}
+            </span>
+        </a>
+        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=more" hx-push-url="?tab=more"
+            class="tab p-0 rounded-xl text-accent font-bold">
+            <span class="w-fit">
+                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">More</span>
+                {{ if .SubMore -}}
+                <span class="{{$activeClass}}"></span>
+                {{- else -}}
+                <span class="{{$normalClass}}"></span>
+                {{- end }}
+            </span>
+        </a>
+    </div>
+    <div class="container mt-5 mx-auto">
+        {{- if .SubAPIKey -}}{{partial "devices/api_key.html" .Device}}{{- end -}}
+        {{- if .SubTryMessage -}}{{partial "devices/send_message.html" .Device}}{{- end -}}
+        {{- if .SubMore -}}
+        <div class="my-5 border-red-400 border-solid border w-full p-3 rounded-box">
+            <div class="prose mb-3">
+                <h4 class="font-bold">Danger Area</h4>
+            </div>
+            <section class="prose">
+                <p>In case device is not connected anymore, you may delete it. But if
+                    the device still connected, ensure to logout manually from you phone</p>
+                <button class="btn btn-sm btn-error" hx-delete="/devices/{{.Page.Device.ID}}"
+                    hx-confirm="You will need to logout manually after deletion. Continue?">Delete Device</button>
+            </section>
+        </div>
+        {{- end -}}
+    </div>
+</div>
+{{- end }}
