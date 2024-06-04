@@ -1,0 +1,3 @@
+wadoh_be_address: "127.0.0.1:50051"
+storage:
+  dsn: "root:@tcp(localhost:3306)/wadoh?parseTime=true"

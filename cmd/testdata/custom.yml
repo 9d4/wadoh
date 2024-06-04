@@ -1,0 +1,8 @@
+log_level: 3
+wadoh_be_address: "0.0.0.0:50051"
+http:
+  address: "0.0.0.0:80"
+  jwt_secret: "secret"
+storage:
+  provider: "mysql"
+  dsn: "root:@tcp(localhost)/wadoh?parseTime=true"

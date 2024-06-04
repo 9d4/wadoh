@@ -1,0 +1,9 @@
+{
+    "log_level": "0",
+    "http": {
+        "jwt_secret": "supersecret"
+    },
+    "storage": {
+        "provider": "mysql"
+    }
+}

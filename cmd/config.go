@@ -18,15 +18,19 @@ import (
 	"github.com/9d4/wadoh/storage"
 )
 
-var (
-	configFileName = "wadoh"
+const (
+	defaultConfigName = "wadoh"
+	configDelimiter   = "."
+	envDelimiter      = "__"
+	envPrefix         = "WADOH_"
 )
 
 var (
-	k             = koanf.New(".")
-	configFile    = ""
+	k                = koanf.New(".")
+	customConfigFile = ""
+	// configDirs is where to search config file if custom is not defined
 	configDirs    = []string{".", "/etc/wadoh"}
-	global        globalConf
+	global        = globalConf{}
 	globalDefault = globalConf{
 		LogLevel:       zerolog.InfoLevel,
 		WadohBeAddress: "localhost:50051",
@@ -48,6 +52,7 @@ func init() {
 	globalDefault.HTTP.JWTSecret = jwtSecret
 }
 
+// globalConf represents config file structure.
 type globalConf struct {
 	LogLevel       zerolog.Level  `koanf:"log_level"`
 	HTTP           http.Config    `koanf:"http"`
@@ -61,21 +66,26 @@ func setupConfig() {
 		log.Fatal().Err(err).Msg("unable to set default config")
 	}
 	loadENV(k)
-	if configFile != "" {
-		loadConfigFile(k, configFile)
+
+	if customConfigFile != "" {
+		loadConfigFile(k, customConfigFile)
 	} else {
 		loadConfigFiles(k)
 	}
 
-	if err := k.Unmarshal("", &global); err != nil {
+	if err := unmarshalKoanf(k, &global); err != nil {
 		log.Fatal().Err(err).Send()
 	}
 }
 
+func unmarshalKoanf(k *koanf.Koanf, dst interface{}) error {
+	return k.Unmarshal("", dst)
+}
+
 func loadENV(k *koanf.Koanf) {
-	k.Load(env.Provider("WADOH_", ".", func(s string) string {
+	_ = k.Load(env.Provider(envPrefix, configDelimiter, func(s string) string {
 		return strings.ReplaceAll(strings.ToLower(
-			strings.TrimPrefix(s, "WADOH_")), "__", ".")
+			strings.TrimPrefix(s, envPrefix)), envDelimiter, configDelimiter)
 	}), nil)
 }
 
@@ -97,9 +107,9 @@ func loadConfigFile(k *koanf.Koanf, path string) {
 func loadConfigFiles(k *koanf.Koanf) {
 	var jsonPaths, yamlPaths []string
 	for _, d := range configDirs {
-		jsonPaths = append(jsonPaths, path.Join(d, configFileName+".json"))
-		yamlPaths = append(yamlPaths, path.Join(d, configFileName+".yaml"))
-		yamlPaths = append(yamlPaths, path.Join(d, configFileName+".yml"))
+		jsonPaths = append(jsonPaths, path.Join(d, defaultConfigName+".json"))
+		yamlPaths = append(yamlPaths, path.Join(d, defaultConfigName+".yaml"))
+		yamlPaths = append(yamlPaths, path.Join(d, defaultConfigName+".yml"))
 	}
 
 	for _, p := range jsonPaths {

@@ -20,15 +20,15 @@ import (
 
 func init() {
 	cobra.OnInitialize(initialize)
-	setupLogger()
 
 	persistent := rootCmd.PersistentFlags()
-	persistent.StringVarP(&configFile, "config", "c", "", "config file to read")
+	persistent.StringVarP(&customConfigFile, "config", "c", "", "config file to read")
 }
 
 func initialize() {
 	setupConfig()
 	setLogLevel(global.LogLevel)
+	setupLogger()
 }
 
 var rootCmd = &cobra.Command{
@@ -45,8 +45,6 @@ var rootCmd = &cobra.Command{
 			*c = global.HTTP
 		})
 
-		log.Debug().Any("a", global).Send()
-
 		if err := srv.Serve(); err != nil {
 			log.Err(err).Send()
 		} else {
@@ -58,7 +56,9 @@ var rootCmd = &cobra.Command{
 		<-interrupt
 
 		log.Info().Msg("shutting down")
-		srv.ShutDown(context.Background())
+		if err := srv.ShutDown(context.Background()); err != nil {
+			log.Err(err).Send()
+		}
 		log.Info().Msg("exited")
 	}),
 }
@@ -72,7 +72,7 @@ func run(runFn func(*cobra.Command, []string, *storage.Storage)) func(cmd *cobra
 
 		usrs, err := storage.Users.List(1, 0)
 		if err == nil && len(usrs) < 1 {
-			storage.Users.Save(&users.User{
+			_ = storage.Users.Save(&users.User{
 				Name:      "admin",
 				Username:  "Admin",
 				Password:  "admin",
