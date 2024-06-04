@@ -3,7 +3,6 @@ module github.com/9d4/wadoh
 go 1.21.10
 
 require (
-	github.com/go-chi/chi v1.5.5
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/jwtauth/v5 v5.3.1
 	github.com/go-sql-driver/mysql v1.8.1
