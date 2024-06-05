@@ -26,7 +26,7 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 		user := users.UserFromContext(r.Context())
 		devices, err := s.storage.Devices.ListByOwnerID(user.ID)
 		if err != nil {
-			Error(w, r, err)
+			Error(s, w, r, err)
 			return
 		}
 
@@ -35,13 +35,13 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 				Devices: devices,
 			},
 		}
-		Error(w, r, s.templates.R(r.Context(), w, tmpl))
+		Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 
 	case webDevicesDetailPath:
 		id := chi.RouteContext(r.Context()).URLParam("id")
 		dev, err := getDevice(s, r.Context(), id)
 		if err != nil {
-			Error(w, r, err)
+			Error(s, w, r, err)
 			return
 		}
 		queryTab := r.URL.Query().Get("tab")
@@ -57,7 +57,7 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 				},
 			},
 		}
-		Error(w, r, s.templates.R(r.Context(), w, tmpl))
+		Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 	}
 }
 
@@ -65,7 +65,7 @@ func webDevicesBlockList(s *Server, w http.ResponseWriter, r *http.Request) {
 	user := users.UserFromContext(r.Context())
 	devices, err := s.storage.Devices.ListByOwnerID(user.ID)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 
@@ -73,14 +73,14 @@ func webDevicesBlockList(s *Server, w http.ResponseWriter, r *http.Request) {
 		Devices: devices,
 	}
 
-	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesBlockDetail(s *Server, w http.ResponseWriter, r *http.Request) {
 	id := chi.RouteContext(r.Context()).URLParam("id")
 	dev, err := getDevice(s, r.Context(), id)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 	queryTab := r.URL.Query().Get("tab")
@@ -95,14 +95,14 @@ func webDevicesBlockDetail(s *Server, w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesBlockDetailPane(s *Server, w http.ResponseWriter, r *http.Request) {
 	id := chi.RouteContext(r.Context()).URLParam("id")
 	dev, err := getDevice(s, r.Context(), id)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 	queryTab := r.URL.Query().Get("tab")
@@ -114,12 +114,12 @@ func webDevicesBlockDetailPane(s *Server, w http.ResponseWriter, r *http.Request
 		SubMore:       queryTab == "more",
 	}
 
-	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesNew(s *Server, w http.ResponseWriter, r *http.Request) {
 	tmpl := &html.DevicesNewTmpl{}
-	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -127,7 +127,7 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 	cli, err := s.pbCli.RegisterDevice(r.Context(), &pb.RegisterDeviceRequest{Phone: phone, PushNotification: true})
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 

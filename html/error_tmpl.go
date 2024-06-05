@@ -2,33 +2,28 @@ package html
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"io"
-
-	"github.com/rs/zerolog/log"
+	"io/fs"
 )
 
 type ErrorTmpl struct {
 	Message string
 	Code    string
+	Status  int
 }
 
-func (t *ErrorTmpl) Render(ctx context.Context, w io.Writer) {
-	sendText := func() {
-		fmt.Fprintf(w, "Something went wrong and unable to render the page. Here's some messages: %s. Code: %s", t.Message, t.Code)
-	}
-	tmp, err := template.ParseFS(TemplatesFS(), "layouts/base.html", "pages/error.html", "templates/*.html")
-	if err != nil {
-		sendText()
-		log.Debug().Caller().Err(err).Send()
-		return
+func (t *ErrorTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
+		tmpl, data, err := prepareRenderer(
+			ctx, fs, site, base,
+			"pages/error.html", t,
+		)
+		if err != nil {
+			return err
+		}
+		return tmpl.Execute(w, data)
 	}
 
-	err = tmp.Execute(w, t)
-	if err != nil {
-		sendText()
-		log.Debug().Caller().Err(err).Send()
-		return
-	}
+	return "base.html", fn
 }

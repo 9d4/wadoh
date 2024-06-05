@@ -13,7 +13,7 @@ import (
 func webUsers(s *Server, w http.ResponseWriter, r *http.Request) {
 	users, err := s.storage.Users.List(20, 0)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 
@@ -22,7 +22,7 @@ func webUsers(s *Server, w http.ResponseWriter, r *http.Request) {
 			Rows: &html.UsersRowsBlock{Users: users},
 		},
 	}
-	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -32,13 +32,13 @@ func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
 	}
 	users, err := s.storage.Users.List(20, since)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 
 	tmpl := &html.UsersRowsBlock{Users: users}
 
-	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webUsersAdd(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -63,13 +63,13 @@ func webUsersEdit(s *Server, w http.ResponseWriter, r *http.Request) {
 	id := chi.RouteContext(r.Context()).URLParam("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 
 	user, err := s.storage.Users.GetBy(idInt)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 
@@ -78,14 +78,14 @@ func webUsersEdit(s *Server, w http.ResponseWriter, r *http.Request) {
 			User: user,
 		},
 	}
-	Error(w, r, s.templates.R(r.Context(), w, tmpl))
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webUsersEditPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	id := chi.RouteContext(r.Context()).URLParam("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 
@@ -99,7 +99,7 @@ func webUsersEditPost(s *Server, w http.ResponseWriter, r *http.Request) {
 		},
 	}
 	if err := s.storage.Users.Update(newUser); err != nil {
-		Error(w, r, err)
+		Error(s, w, r, err)
 		return
 	}
 

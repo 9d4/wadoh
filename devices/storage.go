@@ -35,7 +35,11 @@ func (s *Storage) ListByOwnerID(ownerID uint) ([]Device, error) {
 }
 
 func (s *Storage) GetByID(id string) (*Device, error) {
-	return s.provider.GetByID(id)
+	device, err := s.provider.GetByID(id)
+	if err != nil {
+		return nil, parseError(err, id)
+	}
+	return device, nil
 }
 
 func (s *Storage) Rename(id, newName string) error {
