@@ -33,6 +33,7 @@ const (
 	webDevicesPartialRenamePath          = "/devices/{id}/rename"
 	webDevicesPartialAPIKeyGenPath       = "/devices/{id}/genkey"
 	webDevicesPartialSendMessagePostPath = "/devices/{id}/send"
+	webDevicesSaveWebhookPostPath        = "/devices/{id}/save_webhook"
 
 	webUsersPath       = "/users"
 	webUsersEditPath   = "/users/{id}"
@@ -83,7 +84,7 @@ func Error(s *Server, w http.ResponseWriter, r *http.Request, err error) {
 var errorKindStatus = map[internal.ErrorKind]int{
 	internal.EINTERNAL: http.StatusInternalServerError,
 	internal.ENOTFOUND: http.StatusNotFound,
-    internal.EBADINPUT: http.StatusBadRequest,
+	internal.EBADINPUT: http.StatusBadRequest,
 }
 
 func errorKindToStatus(kind internal.ErrorKind) int {
@@ -144,10 +145,32 @@ func parseJSON(r *http.Request, to any) error {
 }
 
 func SetFlash(w http.ResponseWriter, value string) {
+	maxAge := 0
+	if value == "" {
+		maxAge = -1
+	}
 	http.SetCookie(w, &http.Cookie{
 		Name:     "flash",
 		Value:    value,
 		Path:     "/",
+		MaxAge:   maxAge,
+		HttpOnly: true,
+	})
+}
+
+func SetError(w http.ResponseWriter, err error) {
+	maxAge := 0
+	value := ""
+	if err == nil {
+		maxAge = -1
+	} else {
+		_, value, _ = internal.ParseError(err)
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "error",
+		Value:    value,
+		Path:     "/",
+		MaxAge:   maxAge,
 		HttpOnly: true,
 	})
 }

@@ -18,6 +18,7 @@ type ctxKey string
 const (
 	contextCtxKey ctxKey = "context"
 	flashCtxKey   ctxKey = "flash"
+	errorCtxKey   ctxKey = "error"
 )
 
 type Site struct {
@@ -81,6 +82,9 @@ func buildPageData(ctx context.Context, site *Site, data any) (map[string]interf
 	out["Site"] = site
 	out["User"] = users.UserFromContext(ctx)
 	out["Flash"] = FlashFromContext(ctx)
+	if err := ErrorFromContext(ctx); err != nil {
+		out["Error"] = err
+	}
 
 	return out, nil
 }

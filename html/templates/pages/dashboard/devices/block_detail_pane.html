@@ -25,6 +25,17 @@
                 {{- end }}
             </span>
         </a>
+        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=webhook" hx-push-url="?tab=webhook"
+            class="tab p-0 rounded-xl text-accent font-bold">
+            <span class="w-fit">
+                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">Webhook</span>
+                {{ if .SubWebhook -}}
+                <span class="{{$activeClass}}"></span>
+                {{- else -}}
+                <span class="{{$normalClass}}"></span>
+                {{- end }}
+            </span>
+        </a>
         <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=more" hx-push-url="?tab=more"
             class="tab p-0 rounded-xl text-accent font-bold">
             <span class="w-fit">
@@ -38,8 +49,29 @@
         </a>
     </div>
     <div class="container mt-5 mx-auto">
+        {{- with .Error -}}
+        <div role="alert" class="alert alert-error">
+            <span>{{.}}</span>
+        </div>
+        {{- end -}}
+        {{- with .Flash -}}
+        <div role="alert" class="alert alert-info">
+            <span>{{.}}</span>
+        </div>
+        {{- end -}}
         {{- if .SubAPIKey -}}{{partial "devices/api_key.html" .Device}}{{- end -}}
         {{- if .SubTryMessage -}}{{partial "devices/send_message.html" .Device}}{{- end -}}
+        {{- if .SubWebhook -}}
+        <h4 class="font-bold">Webhook URL
+            <span id="whFormIndicator" class="htmx-indicator loading loading-dots loading-md"></span>
+        </h4>
+        <form class="my-4" hx-post="/devices/{{.Device.ID}}/save_webhook" hx-indicator="#whFormIndicator">
+            <small>Leave empty to disable</small>
+            <input type="tel" name="url" class="mb-2 input input-bordered w-full" {{with .Device.Webhook -}}
+                value="{{.URL}}" {{- end}} />
+            <button type="submit" class="block mt-3 btn btn-sm btn-primary">Save</button>
+        </form>
+        {{- end -}}
         {{- if .SubMore -}}
         <div class="my-5 border-red-400 border-solid border w-full p-3 rounded-box">
             <div class="prose mb-3">

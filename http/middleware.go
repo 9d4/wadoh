@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/9d4/wadoh/html"
@@ -22,8 +23,8 @@ func (s *Server) authenticated(next http.Handler) http.Handler {
 			//if r.URL.Path != "/" {
 			//	target = target + fmt.Sprintf("?%s=%s", redirectContinueParam, r.URL.String())
 			//}
-            
-            // this prevents from infinite redirect
+
+			// this prevents from infinite redirect
 			setUserTokenCookie(w, nil, "")
 			webHTMXRedirect(w, r, target, http.StatusFound)
 		}
@@ -85,6 +86,12 @@ func loadFlash(next http.Handler) http.Handler {
 		if c, err := r.Cookie("flash"); err == nil && c.Value != "" {
 			r = r.WithContext(html.NewFlashContext(r.Context(), c.Value))
 			SetFlash(w, "")
+		}
+
+		// load error. error is also flash
+		if c, err := r.Cookie("error"); err == nil && c.Value != "" {
+			r = r.WithContext(html.NewErrorContext(r.Context(), errors.New(c.Value)))
+			SetError(w, nil)
 		}
 
 		next.ServeHTTP(w, r)

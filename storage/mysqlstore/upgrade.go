@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var versions = []func(*sql.Tx) error{upgradeV1, upgradeV2, upgradeV3}
+var versions = []func(*sql.Tx) error{upgradeV1, upgradeV2, upgradeV3, upgradeV4}
 
 func Upgrade(db *sql.DB) error {
 	version, err := getVersion(db)
@@ -149,5 +149,19 @@ func upgradeV3(tx *sql.Tx) error {
 		return err
 	}
 
+	return nil
+}
+
+func upgradeV4(tx *sql.Tx) error {
+	_, err := tx.Exec(`CREATE TABLE wadoh_device_webhooks (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+		jid VARCHAR(255) NOT NULL,
+        url VARCHAR(255) DEFAULT "",
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (jid) REFERENCES wadoh_devices(id) ON DELETE CASCADE
+    );`)
+	if err != nil {
+		return err
+	}
 	return nil
 }

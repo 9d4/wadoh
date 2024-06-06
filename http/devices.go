@@ -19,6 +19,20 @@ import (
 	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
+func newDevicesDetailPaneBlock(
+	r *http.Request,
+	dev *devices.Device,
+) *html.DevicesDetailPaneBlock {
+	queryTab := r.URL.Query().Get("tab")
+	return &html.DevicesDetailPaneBlock{
+		Device:        dev,
+		SubAPIKey:     queryTab == "api",
+		SubTryMessage: queryTab == "try_message",
+		SubWebhook:    queryTab == "webhook",
+		SubMore:       queryTab == "more",
+	}
+}
+
 func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 	ctx := chi.RouteContext(r.Context())
 	switch ctx.RoutePattern() {
@@ -44,17 +58,11 @@ func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 			Error(s, w, r, err)
 			return
 		}
-		queryTab := r.URL.Query().Get("tab")
 
 		tmpl := &html.DevicesTmpl{
 			Detail: &html.DevicesDetailBlock{
-				Device: dev,
-				DetailPane: &html.DevicesDetailPaneBlock{
-					Device:        dev,
-					SubAPIKey:     queryTab == "api",
-					SubTryMessage: queryTab == "try_message",
-					SubMore:       queryTab == "more",
-				},
+				Device:     dev,
+				DetailPane: newDevicesDetailPaneBlock(r, dev),
 			},
 		}
 		Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
@@ -83,16 +91,10 @@ func webDevicesBlockDetail(s *Server, w http.ResponseWriter, r *http.Request) {
 		Error(s, w, r, err)
 		return
 	}
-	queryTab := r.URL.Query().Get("tab")
 
 	tmpl := &html.DevicesDetailBlock{
-		Device: dev,
-		DetailPane: &html.DevicesDetailPaneBlock{
-			Device:        dev,
-			SubAPIKey:     queryTab == "api",
-			SubTryMessage: queryTab == "try_message",
-			SubMore:       queryTab == "more",
-		},
+		Device:     dev,
+		DetailPane: newDevicesDetailPaneBlock(r, dev),
 	}
 
 	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
@@ -105,15 +107,8 @@ func webDevicesBlockDetailPane(s *Server, w http.ResponseWriter, r *http.Request
 		Error(s, w, r, err)
 		return
 	}
-	queryTab := r.URL.Query().Get("tab")
 
-	tmpl := &html.DevicesDetailPaneBlock{
-		Device:        dev,
-		SubAPIKey:     queryTab == "api",
-		SubTryMessage: queryTab == "try_message",
-		SubMore:       queryTab == "more",
-	}
-
+	tmpl := newDevicesDetailPaneBlock(r, dev)
 	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
@@ -363,6 +358,25 @@ func webDeviceDelete(s *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	webHTMXRedirect(w, r, webDevicesPath, http.StatusFound)
+}
+
+func webDevicesSaveWebhookPost(s *Server, w http.ResponseWriter, r *http.Request) {
+	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	if err != nil {
+		Error(s, w, r, err)
+		return
+	}
+	err = s.storage.Devices.SaveWebhook(&devices.DeviceWebhook{
+		DeviceID: device.ID,
+		URL:      r.FormValue("url"),
+	})
+	if err != nil {
+		SetError(w, err)
+	} else {
+		SetFlash(w, "Webhook url saved successfully")
+	}
+
+	webHTMXRedirect(w, r, r.Referer(), http.StatusFound)
 }
 
 func getDevice(s *Server, ctx context.Context, deviceID string) (*devices.Device, error) {

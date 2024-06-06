@@ -9,11 +9,12 @@ import (
 )
 
 type Device struct {
-	ID       string       `json:"id"`
-	Name     string       `json:"name"`
-	OwnerID  uint         `json:"owner_id"`
-	LinkedAt time.Time    `json:"linked_at"`
-	ApiKey   DeviceApiKey `json:"api_key"`
+	ID       string         `json:"id"`
+	Name     string         `json:"name"`
+	OwnerID  uint           `json:"owner_id"`
+	LinkedAt time.Time      `json:"linked_at"`
+	ApiKey   DeviceApiKey   `json:"api_key"`
+	Webhook  *DeviceWebhook `json:"webhook"`
 }
 
 func (d Device) Phone() string {

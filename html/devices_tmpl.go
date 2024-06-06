@@ -104,13 +104,14 @@ type DevicesDetailPaneBlock struct {
 
 	SubAPIKey     bool
 	SubTryMessage bool
+	SubWebhook    bool
 	SubMore       bool
 }
 
 func (t *DevicesDetailPaneBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
 		// set default pane if none true
-		if !t.SubAPIKey && !t.SubTryMessage && !t.SubMore {
+		if !t.SubAPIKey && !t.SubTryMessage && !t.SubWebhook && !t.SubMore {
 			t.SubAPIKey = true
 		}
 

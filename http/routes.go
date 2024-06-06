@@ -29,8 +29,8 @@ func initializeRoutes(s *Server) {
 		r.Get(webDevicesDetailPath, handle(webDevices))
 		r.Get(webDevicesBlockListPath, handle(webDevicesBlockList))
 		r.Get(webDevicesBlockDetailPath, handle(webDevicesBlockDetail))
-        r.Get(webDevicesBlockDetailPanePath, handle(webDevicesBlockDetailPane))
- 		r.Get(webDevicesNewPath, handle(webDevicesNew))
+		r.Get(webDevicesBlockDetailPanePath, handle(webDevicesBlockDetailPane))
+		r.Get(webDevicesNewPath, handle(webDevicesNew))
 		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
 		r.Delete(webDevicesDeletePath, handle(webDeviceDelete))
 
@@ -39,14 +39,15 @@ func initializeRoutes(s *Server) {
 		r.Put(webDevicesPartialRenamePath, handle(webDevicesRenamePut))
 		r.Post(webDevicesPartialAPIKeyGenPath, handle(webDevicesPartialAPIKeyGenerate))
 		r.Post(webDevicesPartialSendMessagePostPath, handle(webDevicePartialSendMessagePost))
+		r.Post(webDevicesSaveWebhookPostPath, handle(webDevicesSaveWebhookPost))
 	})
 
 	r.Group(func(r chi.Router) {
 		r.Use(s.authenticatedAdmin)
 
 		r.Get(webUsersPath, handle(webUsers))
-        r.Get(webUsersRowsPath, handle(webUsersRows))
-        r.Post(webUsersPath, handle(webUsersAdd))
+		r.Get(webUsersRowsPath, handle(webUsersRows))
+		r.Post(webUsersPath, handle(webUsersAdd))
 		r.Get(webUsersEditPath, handle(webUsersEdit))
 		r.Post(webUsersEditPath, handle(webUsersEditPost))
 		r.Delete(webUsersDeletePath, handle(webUsersDelete))

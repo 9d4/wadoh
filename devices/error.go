@@ -16,9 +16,12 @@ func parseError(err error, data interface{}) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return wrapError(err, ErrDeviceNotFound, data)
 	}
-	return err
+	return wrapError(err, nil, data)
 }
 
 func wrapError(parent error, err error, data interface{}) error {
-    return fmt.Errorf("devices: %v %w: %w", data, err, parent)
+	if err == nil {
+		return fmt.Errorf("devices: %v: %w", data, parent)
+	}
+	return fmt.Errorf("devices: %v %w: %w", data, err, parent)
 }
