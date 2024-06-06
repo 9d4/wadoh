@@ -2,7 +2,7 @@
 {{ $activeClass := "block border-b-2 pb-3 border-b-accent w-8/12 mx-auto" }}
 {{ $normalClass := "block pb-3 w-8/12 mx-auto" }}
 <div id="detailPane" hx-target="this" hx-swap="outerHTML">
-    <div role="tablist" class="tabs tabs-lg w-fit">
+    <div role="tablist" class="tabs tabs-lg w-full py-2 md:py-0 md:w-fit overflow-x-auto overflow-y-hidden whitespace-nowrap">
         <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=api" hx-push-url="?tab=api"
             class="tab p-0 rounded-xl text-accent font-bold">
             <span class="w-fit">
