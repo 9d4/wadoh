@@ -61,7 +61,7 @@ func (c *Client) ReceiveMessage() <-chan EventMessage {
 		codes.Unavailable: true, // etc
 	}
 
-	connect := func() {
+	connect := func() bool {
 		for i := 0; i < maxRetries; i++ {
 			recv, connectErr = c.Service.ReceiveMessage(context.Background(), nil)
 			if retryableStatusCodes[status.Code(connectErr)] {
@@ -70,19 +70,25 @@ func (c *Client) ReceiveMessage() <-chan EventMessage {
 				continue
 			}
 			log.Info().Msg("wadohbe rpc: ReceiveMessage connection established")
-			return
+			return true
 		}
 		close(eventc)
+		log.Info().Msg("wadohbe rpc: closing event channel, max retries exceeded")
+		return false
 	}
 
-	connect()
 	go func() {
+		if !connect() {
+			return
+		}
 		for {
 			msg, err := recv.Recv()
 			if err != nil {
 				log.Error().Caller().Err(err).Send()
 				if retryableStatusCodes[status.Code(err)] {
-					connect()
+					if !connect() {
+						return
+					}
 				}
 				continue
 			}
