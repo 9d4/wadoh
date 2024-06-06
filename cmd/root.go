@@ -9,13 +9,11 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/9d4/wadoh/http"
 	"github.com/9d4/wadoh/storage"
 	"github.com/9d4/wadoh/users"
-	"github.com/9d4/wadoh/wadoh-be/pb"
+	wadohbe "github.com/9d4/wadoh/wadoh-be"
 )
 
 func init() {
@@ -35,25 +33,33 @@ var rootCmd = &cobra.Command{
 	Use:   "wadoh",
 	Short: "Start wadoh web server",
 	Run: run(func(cmd *cobra.Command, args []string, storage *storage.Storage) {
-		conn, err := grpc.NewClient(global.WadohBeAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		rpc, err := wadohbe.NewClient(global.WadohBeAddress)
 		if err != nil {
-			log.Fatal().Err(err).Caller().Send()
+			log.Fatal().Err(err).Send()
 		}
-		pbCli := pb.NewControllerServiceClient(conn)
 
-		srv := http.NewServer(storage, pbCli, func(c *http.Config) {
+		srv := http.NewServer(storage, rpc.Service, func(c *http.Config) {
 			*c = global.HTTP
 		})
 
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+
+		// Start http server
 		if err := srv.Serve(); err != nil {
 			log.Err(err).Send()
+			stop()
 		} else {
 			log.Info().Str("addr", srv.Address()).Msg("http server listening")
 		}
 
-		interrupt := make(chan os.Signal, 1)
-		signal.Notify(interrupt, os.Interrupt, syscall.SIGTERM)
-		<-interrupt
+		// Start device message listener
+		go func() {
+			for a := range rpc.ReceiveMessage() {
+				log.Debug().Any("cmd:recvmessage", a.GetFrom()).Send()
+			}
+		}()
+
+		<-ctx.Done()
 
 		log.Info().Msg("shutting down")
 		if err := srv.ShutDown(context.Background()); err != nil {
