@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/go-chi/jwtauth/v5"
@@ -42,13 +41,13 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 
 	setUserTokenCookie(w, token, tokenString)
 
-	if hx := getHTMX(r); hx != nil && hx.CurrentURL != "" {
-		url, _ := url.Parse(hx.CurrentURL)
-		if cont := url.Query().Get(redirectContinueParam); cont != "" {
-			redirect(w, r, cont, http.StatusOK)
-			return
-		}
-	}
+	// if hx := getHTMX(r); hx != nil && hx.CurrentURL != "" {
+	// 	url, _ := url.Parse(hx.CurrentURL)
+	// 	if cont := url.Query().Get(redirectContinueParam); cont != "" {
+	// 		redirect(w, r, cont, http.StatusOK)
+	// 		return
+	// 	}
+	// }
 
 	redirect(w, r, "/", http.StatusOK)
 }

@@ -67,6 +67,9 @@ func setHTMXHeaders(w http.ResponseWriter, h htmxResponse) {
 }
 
 func getHTMX(r *http.Request) *htmxRequest {
+	if c, err := r.Cookie("redirected"); err == nil && c.Value == "true" {
+		return nil
+	}
 	if r.Header.Get("HX-Request") != "true" {
 		return nil
 	}
@@ -83,35 +86,47 @@ func getHTMX(r *http.Request) *htmxRequest {
 }
 
 func redirect(w http.ResponseWriter, r *http.Request, path string, code int) {
+	setRedirectCookie := func() {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "redirected",
+			Value:    "true",
+			Path:     "/",
+			MaxAge:   1,
+			HttpOnly: true,
+		})
+	}
+
 	hxRequest := getHTMX(r)
 	hasReferer := r.Referer() != ""
 	hasOrigin := r.Header.Get("Origin") != ""
 	if hxRequest != nil && (hasReferer || hasOrigin) {
-		baseURL := ""
+		// baseURL := ""
 		u, err := url.Parse(r.Referer())
 		if err == nil {
-			baseURL = u.Host
+			// baseURL = u.Host
 		} else {
 			u, err = url.Parse(r.Header.Get("Origin"))
 			if err == nil {
-				baseURL = u.Host
+				// baseURL = u.Host
 			}
 		}
 
-		if baseURL != "" {
-			setHTMXHeaders(w, htmxResponse{
-				HXLocation: path,
-				HXPushUrl:  u.JoinPath(path).String(),
-			})
-			w.WriteHeader(code)
-			return
-		}
+		setHTMXHeaders(w, htmxResponse{
+			HXLocation: path,
+			HXRedirect: path,
+			HXPushUrl:  u.JoinPath(path).String(),
+			HXRefresh:  true,
+		})
+		setRedirectCookie()
+		w.WriteHeader(code)
+		return
 	}
 
-	setHTMXHeaders(w, htmxResponse{
-		HXLocation: path,
-		HXRedirect: path,
-		HXRefresh:  true,
-	})
-	w.WriteHeader(code)
+	// setHTMXHeaders(w, htmxResponse{
+	// 	HXLocation: path,
+	// 	HXRedirect: path,
+	// 	HXRefresh:  true,
+	// })
+	setRedirectCookie()
+	http.Redirect(w, r, path, code)
 }
