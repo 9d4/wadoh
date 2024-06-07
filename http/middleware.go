@@ -26,7 +26,7 @@ func (s *Server) authenticated(next http.Handler) http.Handler {
 
 			// this prevents from infinite redirect
 			setUserTokenCookie(w, nil, "")
-			webHTMXRedirect(w, r, target, http.StatusFound)
+			redirect(w, r, target, http.StatusFound)
 		}
 
 		if err != nil {
@@ -58,7 +58,7 @@ func (s *Server) unAuthenticated(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		_, _, err := jwtauth.FromContext(r.Context())
 		if err == nil {
-			webHTMXRedirect(w, r, "/", http.StatusFound)
+			redirect(w, r, "/", http.StatusFound)
 			return
 		}
 

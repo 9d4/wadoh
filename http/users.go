@@ -11,21 +11,8 @@ import (
 )
 
 func webUsers(s *Server, w http.ResponseWriter, r *http.Request) {
-	users, err := s.storage.Users.List(20, 0)
-	if err != nil {
-		Error(s, w, r, err)
-		return
-	}
+	htmx := getHTMX(r)
 
-	tmpl := &html.UsersTmpl{
-		List: &html.UsersListBlock{
-			Rows: &html.UsersRowsBlock{Users: users},
-		},
-	}
-	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
-}
-
-func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
 	since := 0
 	if i, err := strconv.Atoi(r.URL.Query().Get("since")); err == nil {
 		since = i
@@ -35,9 +22,23 @@ func webUsersRows(s *Server, w http.ResponseWriter, r *http.Request) {
 		Error(s, w, r, err)
 		return
 	}
+	if err != nil {
+		Error(s, w, r, err)
+		return
+	}
+	rows := &html.UsersRowsBlock{Users: users}
 
-	tmpl := &html.UsersRowsBlock{Users: users}
+	// if htmx request, send rows only
+	if htmx != nil {
+		Error(s, w, r, s.templates.R(r.Context(), w, rows))
+		return
+	}
 
+	tmpl := &html.UsersTmpl{
+		List: &html.UsersListBlock{
+			Rows: rows,
+		},
+	}
 	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
@@ -111,14 +112,14 @@ func webUsersDelete(s *Server, w http.ResponseWriter, r *http.Request) {
 	id := chi.RouteContext(r.Context()).URLParam("id")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
-		webHTMXRedirect(w, r, r.Referer(), http.StatusFound)
+		redirect(w, r, r.Referer(), http.StatusFound)
 		return
 	}
 	if err := s.storage.Users.Delete(uint(idInt)); err != nil {
-		webHTMXRedirect(w, r, r.Referer(), http.StatusFound)
+		redirect(w, r, r.Referer(), http.StatusFound)
 		return
 	}
 
 	SetFlash(w, "User deleted succesfully")
-	webHTMXRedirect(w, r, webUsersPath, http.StatusFound)
+	redirect(w, r, webUsersPath, http.StatusFound)
 }

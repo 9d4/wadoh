@@ -28,7 +28,7 @@
 {{- if ne $lastID 0 -}}
 <tr id="replaceMe">
     <td colspan="3">
-        <button class='btn btn-sm' hx-get="/users/rows/?since={{$lastID}}" hx-target="#replaceMe" hx-swap="outerHTML">
+        <button class='btn btn-sm' hx-get="/users?since={{$lastID}}" hx-target="#replaceMe" hx-swap="outerHTML">
             Load More... <span class="htmx-indicator loading loading-dots"></span>
         </button>
     </td>

@@ -19,6 +19,52 @@ import (
 	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
+func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
+	htmx := getHTMX(r)
+
+	user := users.UserFromContext(r.Context())
+	devices, err := s.storage.Devices.ListByOwnerID(user.ID)
+	if err != nil {
+		Error(s, w, r, err)
+		return
+	}
+
+	listBlock := &html.DevicesListBlock{
+		Devices: devices,
+	}
+
+	if htmx != nil {
+		Error(s, w, r, s.templates.R(r.Context(), w, listBlock))
+		return
+	}
+
+	tmpl := &html.DevicesTmpl{List: listBlock}
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
+}
+
+func webDevicesDetail(s *Server, w http.ResponseWriter, r *http.Request) {
+	htmx := getHTMX(r)
+	id := chi.RouteContext(r.Context()).URLParam("id")
+	dev, err := getDevice(s, r.Context(), id)
+	if err != nil {
+		Error(s, w, r, err)
+		return
+	}
+
+	detailBlock := &html.DevicesDetailBlock{
+		Device:     dev,
+		DetailPane: newDevicesDetailPaneBlock(r, dev),
+	}
+
+	if htmx != nil {
+		Error(s, w, r, s.templates.R(r.Context(), w, detailBlock))
+		return
+	}
+
+	tmpl := &html.DevicesTmpl{Detail: detailBlock}
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
+}
+
 func newDevicesDetailPaneBlock(
 	r *http.Request,
 	dev *devices.Device,
@@ -31,73 +77,6 @@ func newDevicesDetailPaneBlock(
 		SubWebhook:    queryTab == "webhook",
 		SubMore:       queryTab == "more",
 	}
-}
-
-func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
-	ctx := chi.RouteContext(r.Context())
-	switch ctx.RoutePattern() {
-	case webDevicesPath:
-		user := users.UserFromContext(r.Context())
-		devices, err := s.storage.Devices.ListByOwnerID(user.ID)
-		if err != nil {
-			Error(s, w, r, err)
-			return
-		}
-
-		tmpl := &html.DevicesTmpl{
-			List: &html.DevicesListBlock{
-				Devices: devices,
-			},
-		}
-		Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
-
-	case webDevicesDetailPath:
-		id := chi.RouteContext(r.Context()).URLParam("id")
-		dev, err := getDevice(s, r.Context(), id)
-		if err != nil {
-			Error(s, w, r, err)
-			return
-		}
-
-		tmpl := &html.DevicesTmpl{
-			Detail: &html.DevicesDetailBlock{
-				Device:     dev,
-				DetailPane: newDevicesDetailPaneBlock(r, dev),
-			},
-		}
-		Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
-	}
-}
-
-func webDevicesBlockList(s *Server, w http.ResponseWriter, r *http.Request) {
-	user := users.UserFromContext(r.Context())
-	devices, err := s.storage.Devices.ListByOwnerID(user.ID)
-	if err != nil {
-		Error(s, w, r, err)
-		return
-	}
-
-	tmpl := &html.DevicesListBlock{
-		Devices: devices,
-	}
-
-	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
-}
-
-func webDevicesBlockDetail(s *Server, w http.ResponseWriter, r *http.Request) {
-	id := chi.RouteContext(r.Context()).URLParam("id")
-	dev, err := getDevice(s, r.Context(), id)
-	if err != nil {
-		Error(s, w, r, err)
-		return
-	}
-
-	tmpl := &html.DevicesDetailBlock{
-		Device:     dev,
-		DetailPane: newDevicesDetailPaneBlock(r, dev),
-	}
-
-	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDevicesBlockDetailPane(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -353,11 +332,11 @@ func webDeviceDelete(s *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := s.storage.Devices.Delete(device.ID); err != nil {
-		webHTMXRedirect(w, r, webDevicesPath, http.StatusFound)
+		redirect(w, r, webDevicesPath, http.StatusFound)
 		log.Debug().Caller().Err(err).Send()
 		return
 	}
-	webHTMXRedirect(w, r, webDevicesPath, http.StatusFound)
+	redirect(w, r, webDevicesPath, http.StatusFound)
 }
 
 func webDevicesSaveWebhookPost(s *Server, w http.ResponseWriter, r *http.Request) {
@@ -376,7 +355,7 @@ func webDevicesSaveWebhookPost(s *Server, w http.ResponseWriter, r *http.Request
 		SetFlash(w, "Webhook url saved successfully")
 	}
 
-	webHTMXRedirect(w, r, r.Referer(), http.StatusFound)
+	redirect(w, r, r.Referer(), http.StatusFound)
 }
 
 func getDevice(s *Server, ctx context.Context, deviceID string) (*devices.Device, error) {

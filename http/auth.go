@@ -42,15 +42,15 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 
 	setUserTokenCookie(w, token, tokenString)
 
-	if currentUrl := getHTMXCurrentURL(r); currentUrl != "" {
-		url, _ := url.Parse(currentUrl)
+	if hx := getHTMX(r); hx != nil && hx.CurrentURL != "" {
+		url, _ := url.Parse(hx.CurrentURL)
 		if cont := url.Query().Get(redirectContinueParam); cont != "" {
-			webHTMXRedirect(w, r, cont, http.StatusOK)
+			redirect(w, r, cont, http.StatusOK)
 			return
 		}
 	}
 
-	webHTMXRedirect(w, r, "/", http.StatusOK)
+	redirect(w, r, "/", http.StatusOK)
 }
 
 func webLogoutPost(s *Server, w http.ResponseWriter, r *http.Request) {

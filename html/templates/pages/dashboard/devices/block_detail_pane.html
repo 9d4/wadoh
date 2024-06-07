@@ -2,8 +2,8 @@
 {{ $activeClass := "block border-b-2 pb-3 border-b-accent w-8/12 mx-auto" }}
 {{ $normalClass := "block pb-3 w-8/12 mx-auto" }}
 <div id="detailPane" hx-target="this" hx-swap="outerHTML">
-    <div role="tablist" class="tabs tabs-lg w-full py-2 md:py-0 md:w-fit overflow-x-auto overflow-y-hidden whitespace-nowrap">
-        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=api" hx-push-url="?tab=api"
+    <div role="tablist" class="tabs tabs-lg w-full py-2 md:w-fit overflow-x-auto overflow-y-hidden whitespace-nowrap">
+        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=api" hx-push-url="?tab=api"
             class="tab p-0 rounded-xl text-accent font-bold">
             <span class="w-fit">
                 <span class="hover:bg-accent-content px-4 py-3 rounded-xl">API Key</span>
@@ -14,7 +14,7 @@
                 {{- end }}
             </span>
         </a>
-        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=try_message"
+        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=try_message"
             hx-push-url="?tab=try_message" class="tab p-0 rounded-xl text-accent font-bold">
             <span class="w-fit">
                 <span class="hover:bg-accent-content px-4 py-3 rounded-xl">Try Message</span>
@@ -25,7 +25,7 @@
                 {{- end }}
             </span>
         </a>
-        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=webhook" hx-push-url="?tab=webhook"
+        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=webhook" hx-push-url="?tab=webhook"
             class="tab p-0 rounded-xl text-accent font-bold">
             <span class="w-fit">
                 <span class="hover:bg-accent-content px-4 py-3 rounded-xl">Webhook</span>
@@ -36,7 +36,7 @@
                 {{- end }}
             </span>
         </a>
-        <a aria-current="page" hx-get="/devices/detail/{{.Device.ID}}/pane?tab=more" hx-push-url="?tab=more"
+        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=more" hx-push-url="?tab=more"
             class="tab p-0 rounded-xl text-accent font-bold">
             <span class="w-fit">
                 <span class="hover:bg-accent-content px-4 py-3 rounded-xl">More</span>

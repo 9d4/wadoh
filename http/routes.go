@@ -26,9 +26,7 @@ func initializeRoutes(s *Server) {
 			http.Redirect(w, r, webDevicesPath, http.StatusFound)
 		})
 		r.Get(webDevicesPath, handle(webDevices))
-		r.Get(webDevicesDetailPath, handle(webDevices))
-		r.Get(webDevicesBlockListPath, handle(webDevicesBlockList))
-		r.Get(webDevicesBlockDetailPath, handle(webDevicesBlockDetail))
+		r.Get(webDevicesDetailPath, handle(webDevicesDetail))
 		r.Get(webDevicesBlockDetailPanePath, handle(webDevicesBlockDetailPane))
 		r.Get(webDevicesNewPath, handle(webDevicesNew))
 		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
@@ -46,7 +44,6 @@ func initializeRoutes(s *Server) {
 		r.Use(s.authenticatedAdmin)
 
 		r.Get(webUsersPath, handle(webUsers))
-		r.Get(webUsersRowsPath, handle(webUsersRows))
 		r.Post(webUsersPath, handle(webUsersAdd))
 		r.Get(webUsersEditPath, handle(webUsersEdit))
 		r.Post(webUsersEditPath, handle(webUsersEditPost))
