@@ -22,8 +22,7 @@ func initializeRoutes(s *Server) {
 
 		r.Post(webLogoutPostPath, handle(webLogoutPost))
 		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("HX-Redirect", webDevicesPath)
-			http.Redirect(w, r, webDevicesPath, http.StatusFound)
+			redirectRefresh(w, r, webDevicesPath, http.StatusFound)
 		})
 		r.Get(webDevicesPath, handle(webDevices))
 		r.Get(webDevicesDetailPath, handle(webDevicesDetail))

@@ -115,6 +115,7 @@ func webUsersDelete(s *Server, w http.ResponseWriter, r *http.Request) {
 		redirect(w, r, r.Referer(), http.StatusFound)
 		return
 	}
+	_ = idInt
 	if err := s.storage.Users.Delete(uint(idInt)); err != nil {
 		redirect(w, r, r.Referer(), http.StatusFound)
 		return

@@ -54,9 +54,10 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 
 func webLogoutPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	clearUserTokenCookie(w)
-	header := w.Header()
-	header["HX-Refresh"] = []string{"true"}
-	w.WriteHeader(http.StatusNoContent)
+	// header := w.Header()
+	// header["HX-Refresh"] = []string{"true"}
+	// w.WriteHeader(http.StatusNoContent)
+	redirect(w, r, webLoginPath, http.StatusFound)
 }
 
 func createUserToken(tokenAuth *jwtauth.JWTAuth, u *users.User) (token jwt.Token, tokenString string, err error) {

@@ -14,6 +14,8 @@ type htmxRequest struct {
 	Target                string
 	TriggerName           string
 	Trigger               string
+	//Redirected indicates that this hx-request has been redirected
+	Redirected bool
 }
 
 type htmxResponse struct {
@@ -66,10 +68,19 @@ func setHTMXHeaders(w http.ResponseWriter, h htmxResponse) {
 	}
 }
 
+// getHTMX returns *htmxRequest only if that request is not redirected.
+// example:
+//
+//	hxreq ---> /        ---> ask to redirect to /devices
+//	hxreq ---> /devices ---> getHTMX(r) == nil (because was redirected from /)
 func getHTMX(r *http.Request) *htmxRequest {
-	if c, err := r.Cookie("redirected"); err == nil && c.Value == "true" {
+	if isHTMXRedirected(r) {
 		return nil
 	}
+	return getHTMXRaw(r)
+}
+
+func getHTMXRaw(r *http.Request) *htmxRequest {
 	if r.Header.Get("HX-Request") != "true" {
 		return nil
 	}
@@ -85,48 +96,67 @@ func getHTMX(r *http.Request) *htmxRequest {
 	return hx
 }
 
-func redirect(w http.ResponseWriter, r *http.Request, path string, code int) {
-	setRedirectCookie := func() {
-		http.SetCookie(w, &http.Cookie{
-			Name:     "redirected",
-			Value:    "true",
-			Path:     "/",
-			MaxAge:   1,
-			HttpOnly: true,
-		})
-	}
+func setRedirectCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "hx-redirect",
+		Value:    "true",
+		Path:     "/",
+		MaxAge:   1,
+		HttpOnly: true,
+	})
+}
 
-	hxRequest := getHTMX(r)
-	hasReferer := r.Referer() != ""
-	hasOrigin := r.Header.Get("Origin") != ""
-	if hxRequest != nil && (hasReferer || hasOrigin) {
-		// baseURL := ""
-		u, err := url.Parse(r.Referer())
-		if err == nil {
-			// baseURL = u.Host
-		} else {
-			u, err = url.Parse(r.Header.Get("Origin"))
-			if err == nil {
-				// baseURL = u.Host
-			}
-		}
+func isHTMXRedirected(r *http.Request) bool {
+	c, err := r.Cookie("hx-redirect")
+	return err == nil && c.Value == "true"
+}
 
-		setHTMXHeaders(w, htmxResponse{
-			HXLocation: path,
+// redirectRefresh redirects and refresh.
+func redirectRefresh(w http.ResponseWriter, r *http.Request, path string, code int) {
+	hxRequest := getHTMXRaw(r)
+	if hxRequest != nil {
+		hxRes := htmxResponse{
 			HXRedirect: path,
-			HXPushUrl:  u.JoinPath(path).String(),
-			HXRefresh:  true,
-		})
-		setRedirectCookie()
+		}
+		setHTMXHeaders(w, hxRes)
+		setRedirectCookie(w)
 		w.WriteHeader(code)
 		return
 	}
 
-	// setHTMXHeaders(w, htmxResponse{
-	// 	HXLocation: path,
-	// 	HXRedirect: path,
-	// 	HXRefresh:  true,
-	// })
-	setRedirectCookie()
+	http.Redirect(w, r, path, code)
+}
+
+func redirect(w http.ResponseWriter, r *http.Request, path string, code int) {
+	hxRequest := getHTMX(r)
+	if hxRequest != nil {
+		// here we do full refresh when we cannot determine the baseURL of
+		// the origin request.
+
+		hxRes := htmxResponse{
+			HXLocation: path,
+		}
+
+		u, err := url.Parse(r.Header.Get("Origin"))
+		if err == nil {
+			hxRes.HXPushUrl = u.JoinPath(path).String()
+		} else {
+			u, err := url.Parse(r.Referer())
+			if err == nil {
+				u.RawPath = ""
+				hxRes.HXPushUrl = u.JoinPath(path).String()
+			} else {
+				// or do full refresh instead
+				hxRes.HXRefresh = true
+			}
+		}
+		setHTMXHeaders(w, hxRes)
+		if !hxRes.HXRefresh {
+			setRedirectCookie(w)
+		}
+		w.WriteHeader(code)
+		return
+	}
+
 	http.Redirect(w, r, path, code)
 }
