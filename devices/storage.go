@@ -1,10 +1,14 @@
 package devices
 
 import (
+	"context"
 	"net/url"
 	"time"
 
 	"github.com/9d4/wadoh/internal"
+	"github.com/9d4/wadoh/wadoh-be/pb"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -19,16 +23,18 @@ type StorageProvider interface {
 	Delete(string) error
 	SaveAPIKey(*DeviceApiKey) error
 	GetByAPIToken(string) (*Device, error)
-	SaveWebhook(*DeviceWebhook) error
+	SaveWebhook(*DeviceWebhook) error // Deprecated
 }
 
 type Storage struct {
 	provider StorageProvider
+	pbCli    pb.ControllerServiceClient
 }
 
-func NewStorage(provider StorageProvider) *Storage {
+func NewStorage(provider StorageProvider, pbCli pb.ControllerServiceClient) *Storage {
 	return &Storage{
 		provider: provider,
+		pbCli:    pbCli,
 	}
 }
 
@@ -45,6 +51,19 @@ func (s *Storage) GetByID(id string) (*Device, error) {
 	if err != nil {
 		return nil, parseError(err, id)
 	}
+	device.Webhook = &DeviceWebhook{
+		DeviceID: device.ID,
+	}
+
+	res, err := s.pbCli.GetWebhook(context.Background(), &pb.GetWebhookRequest{
+		Jid: device.ID,
+	})
+	if err == nil {
+		device.Webhook.URL = res.GetUrl()
+	} else if status.Code(err) != codes.NotFound {
+		return nil, parseError(err, id)
+	}
+
 	return device, nil
 }
 
@@ -88,8 +107,20 @@ func (s *Storage) SaveWebhook(wh *DeviceWebhook) error {
 			return wrapError(err, newErr, wh.URL)
 		}
 		wh.URL = url.String()
+
+		_, err = s.pbCli.SaveWebhook(context.Background(), &pb.SaveWebhookRequest{
+			Jid: wh.DeviceID,
+			Url: wh.URL,
+		})
+		if err != nil {
+			return parseError(err, wh.DeviceID)
+		}
+		return nil
 	}
-	err := s.provider.SaveWebhook(wh)
+
+	_, err := s.pbCli.DeleteWebhook(context.Background(), &pb.DeleteWebhookRequest{
+		Jid: wh.DeviceID,
+	})
 	if err != nil {
 		return parseError(err, wh.DeviceID)
 	}

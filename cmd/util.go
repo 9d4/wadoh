@@ -8,6 +8,7 @@ import (
 
 	"github.com/9d4/wadoh/storage"
 	"github.com/9d4/wadoh/storage/mysqlstore"
+	wadohbe "github.com/9d4/wadoh/wadoh-be"
 )
 
 func setupLogger() {
@@ -22,13 +23,18 @@ func setLogLevel(l zerolog.Level) {
 }
 
 func getStorage() (*storage.Storage, error) {
+	rpc, err := wadohbe.NewClient(global.WadohBeAddress)
+	if err != nil {
+		log.Fatal().Caller().Err(err).Send()
+	}
+
 	switch global.Storage.Provider {
 	case "mysql":
 		store, err := mysqlstore.New(global.Storage.DSN)
 		if err != nil {
 			return nil, err
 		}
-		return storage.NewStorage(store.Users, store.Devices), nil
+		return storage.NewStorage(rpc.Service, store.Users, store.Devices), nil
 	default:
 		log.Fatal().Msg("unsupported storage provider: " + global.Storage.Provider)
 	}

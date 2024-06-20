@@ -38,11 +38,9 @@ func (s *devicesStore) ListByOwnerID(ownerID uint) ([]devices.Device, error) {
 
 func (s *devicesStore) GetByID(id string) (*devices.Device, error) {
 	const query = "SELECT devices.id, devices.name, devices.user_id, devices.linked_at, " +
-		"`keys`.id, `keys`.name, `keys`.token, `keys`.created_at, " +
-		"wh.url " +
+		"`keys`.id, `keys`.name, `keys`.token, `keys`.created_at " +
 		"FROM wadoh_devices devices " +
 		"LEFT JOIN wadoh_device_api_keys `keys` ON `keys`.jid=devices.id " +
-		"LEFT JOIN wadoh_device_webhooks wh ON wh.jid=devices.id " +
 		"WHERE devices.id=?"
 
 	row := s.db.QueryRow(query, id)
@@ -54,11 +52,9 @@ func (s *devicesStore) GetByID(id string) (*devices.Device, error) {
 	var keyID *uint
 	var keyName, keyToken *string
 	var keyCreatedAt *time.Time
-	var webhookUrl *string
 
 	if err := row.Scan(&dev.ID, &dev.Name, &dev.OwnerID, &dev.LinkedAt,
 		&keyID, &keyName, &keyToken, &keyCreatedAt,
-		&webhookUrl,
 	); err != nil {
 		return nil, err
 	}
@@ -74,12 +70,6 @@ func (s *devicesStore) GetByID(id string) (*devices.Device, error) {
 	}
 	if keyCreatedAt != nil {
 		dev.ApiKey.CreatedAt = *keyCreatedAt
-	}
-	if webhookUrl != nil {
-		dev.Webhook = &devices.DeviceWebhook{
-			DeviceID: dev.ID,
-			URL:      *webhookUrl,
-		}
 	}
 
 	return &dev, nil

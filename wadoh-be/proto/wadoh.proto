@@ -7,6 +7,9 @@ service ControllerService {
     rpc RegisterDevice (RegisterDeviceRequest) returns (stream RegisterDeviceResponse);
     rpc SendMessage (SendMessageRequest) returns (Empty);
     rpc ReceiveMessage (Empty) returns (stream EventMessage);
+    rpc GetWebhook (GetWebhookRequest) returns (GetWebhookResponse);
+    rpc SaveWebhook (SaveWebhookRequest) returns (Empty);
+    rpc DeleteWebhook (DeleteWebhookRequest) returns (Empty);
 }
 
 message Empty {
@@ -50,4 +53,22 @@ message EventMessage {
     string jid = 1;
     string from = 2;
     string message = 3;
+}
+
+message GetWebhookRequest {
+    string jid = 1;
+}
+
+message GetWebhookResponse {
+    string url = 1;
+    int64 timestamp = 2;
+}
+    
+message SaveWebhookRequest {
+    string jid = 1;
+    string url = 2;
+}
+
+message DeleteWebhookRequest {
+    string jid = 1;
 }
