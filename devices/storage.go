@@ -24,6 +24,7 @@ type StorageProvider interface {
 	SaveAPIKey(*DeviceApiKey) error
 	GetByAPIToken(string) (*Device, error)
 	SaveWebhook(*DeviceWebhook) error // Deprecated
+	ChangeID(id, newID string) error
 }
 
 type Storage struct {
@@ -65,6 +66,11 @@ func (s *Storage) GetByID(id string) (*Device, error) {
 	}
 
 	return device, nil
+}
+
+// On reconnect we need to change the device id to the new one
+func (s *Storage) ChangeID(id, newID string) error {
+	return s.provider.ChangeID(id, newID)
 }
 
 func (s *Storage) Rename(id, newName string) error {

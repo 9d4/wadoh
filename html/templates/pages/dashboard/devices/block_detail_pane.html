@@ -1,90 +1,148 @@
 {{ define "body" -}}
+<!---->
 {{ $activeClass := "block border-b-2 pb-3 border-b-accent w-8/12 mx-auto" }}
-{{ $normalClass := "block pb-3 w-8/12 mx-auto" }}
+<!---->
+{{$normalClass := "block pb-3 w-8/12 mx-auto" }}
 <div id="detailPane" hx-target="this" hx-swap="outerHTML">
-    <div role="tablist" class="tabs tabs-lg w-full py-2 md:w-fit overflow-x-auto overflow-y-hidden whitespace-nowrap">
-        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=api" hx-push-url="?tab=api"
-            class="tab p-0 rounded-xl text-accent font-bold">
-            <span class="w-fit">
-                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">API Key</span>
-                {{ if .SubAPIKey -}}
-                <span class="{{$activeClass}}"></span>
-                {{- else -}}
-                <span class="{{$normalClass}}"></span>
-                {{- end }}
-            </span>
-        </a>
-        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=try_message"
-            hx-push-url="?tab=try_message" class="tab p-0 rounded-xl text-accent font-bold">
-            <span class="w-fit">
-                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">Try Message</span>
-                {{ if .SubTryMessage -}}
-                <span class="{{$activeClass}}"></span>
-                {{- else -}}
-                <span class="{{$normalClass}}"></span>
-                {{- end }}
-            </span>
-        </a>
-        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=webhook" hx-push-url="?tab=webhook"
-            class="tab p-0 rounded-xl text-accent font-bold">
-            <span class="w-fit">
-                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">Webhook</span>
-                {{ if .SubWebhook -}}
-                <span class="{{$activeClass}}"></span>
-                {{- else -}}
-                <span class="{{$normalClass}}"></span>
-                {{- end }}
-            </span>
-        </a>
-        <a aria-current="page" hx-get="/devices/{{.Device.ID}}/pane?tab=more" hx-push-url="?tab=more"
-            class="tab p-0 rounded-xl text-accent font-bold">
-            <span class="w-fit">
-                <span class="hover:bg-accent-content px-4 py-3 rounded-xl">More</span>
-                {{ if .SubMore -}}
-                <span class="{{$activeClass}}"></span>
-                {{- else -}}
-                <span class="{{$normalClass}}"></span>
-                {{- end }}
-            </span>
-        </a>
+  <div
+    role="tablist"
+    class="tabs tabs-lg w-full py-2 md:w-fit overflow-x-auto overflow-y-hidden whitespace-nowrap"
+  >
+    <a
+      aria-current="page"
+      hx-get="/devices/{{.Device.ID}}/pane?tab=api"
+      hx-push-url="?tab=api"
+      class="tab p-0 rounded-xl text-accent font-bold"
+    >
+      <span class="w-fit">
+        <span class="hover:bg-accent-content px-4 py-3 rounded-xl"
+          >API Key</span
+        >
+        {{ if .SubAPIKey -}}
+        <span class="{{$activeClass}}"></span>
+        {{- else -}}
+        <span class="{{$normalClass}}"></span>
+        {{- end }}
+      </span>
+    </a>
+    <a
+      aria-current="page"
+      hx-get="/devices/{{.Device.ID}}/pane?tab=try_message"
+      hx-push-url="?tab=try_message"
+      class="tab p-0 rounded-xl text-accent font-bold"
+    >
+      <span class="w-fit">
+        <span class="hover:bg-accent-content px-4 py-3 rounded-xl"
+          >Try Message</span
+        >
+        {{ if .SubTryMessage -}}
+        <span class="{{$activeClass}}"></span>
+        {{- else -}}
+        <span class="{{$normalClass}}"></span>
+        {{- end }}
+      </span>
+    </a>
+    <a
+      aria-current="page"
+      hx-get="/devices/{{.Device.ID}}/pane?tab=webhook"
+      hx-push-url="?tab=webhook"
+      class="tab p-0 rounded-xl text-accent font-bold"
+    >
+      <span class="w-fit">
+        <span class="hover:bg-accent-content px-4 py-3 rounded-xl"
+          >Webhook</span
+        >
+        {{ if .SubWebhook -}}
+        <span class="{{$activeClass}}"></span>
+        {{- else -}}
+        <span class="{{$normalClass}}"></span>
+        {{- end }}
+      </span>
+    </a>
+    <a
+      aria-current="page"
+      hx-get="/devices/{{.Device.ID}}/pane?tab=more"
+      hx-push-url="?tab=more"
+      class="tab p-0 rounded-xl text-accent font-bold"
+    >
+      <span class="w-fit">
+        <span class="hover:bg-accent-content px-4 py-3 rounded-xl">More</span>
+        {{ if .SubMore -}}
+        <span class="{{$activeClass}}"></span>
+        {{- else -}}
+        <span class="{{$normalClass}}"></span>
+        {{- end }}
+      </span>
+    </a>
+  </div>
+  <div class="container mt-5 mx-auto">
+    {{- with .Error -}}
+    <div role="alert" class="alert alert-error">
+      <span>{{.}}</span>
     </div>
-    <div class="container mt-5 mx-auto">
-        {{- with .Error -}}
-        <div role="alert" class="alert alert-error">
-            <span>{{.}}</span>
-        </div>
-        {{- end -}}
-        {{- with .Flash -}}
-        <div role="alert" class="alert alert-info">
-            <span>{{.}}</span>
-        </div>
-        {{- end -}}
-        {{- if .SubAPIKey -}}{{partial "devices/api_key.html" .Device}}{{- end -}}
-        {{- if .SubTryMessage -}}{{partial "devices/send_message.html" .Device}}{{- end -}}
-        {{- if .SubWebhook -}}
-        <h4 class="font-bold">Webhook URL
-            <span id="whFormIndicator" class="htmx-indicator loading loading-dots loading-md"></span>
-        </h4>
-        <form class="my-4" hx-post="/devices/{{.Device.ID}}/save_webhook" hx-indicator="#whFormIndicator">
-            <small>Leave empty to disable</small>
-            <input type="tel" name="url" class="mb-2 input input-bordered w-full" {{with .Device.Webhook -}}
-                value="{{.URL}}" {{- end}} />
-            <button type="submit" class="block mt-3 btn btn-sm btn-primary">Save</button>
-        </form>
-        {{- end -}}
-        {{- if .SubMore -}}
-        <div class="my-5 border-red-400 border-solid border w-full p-3 rounded-box">
-            <div class="prose mb-3">
-                <h4 class="font-bold">Danger Area</h4>
-            </div>
-            <section class="prose">
-                <p>In case device is not connected anymore, you may delete it. But if
-                    the device still connected, ensure to logout manually from you phone</p>
-                <button class="btn btn-sm btn-error" hx-delete="/devices/{{.Page.Device.ID}}"
-                    hx-confirm="You will need to logout manually after deletion. Continue?">Delete Device</button>
-            </section>
-        </div>
-        {{- end -}}
+    {{- end -}} {{- with .Flash -}}
+    <div role="alert" class="alert alert-info">
+      <span>{{.}}</span>
     </div>
+    {{- end -}} {{- if .SubAPIKey -}}{{partial "devices/api_key.html"
+    .Device}}{{- end -}} {{- if .SubTryMessage -}}{{partial
+    "devices/send_message.html" .Device}}{{- end -}} {{- if .SubWebhook -}}
+    <h4 class="font-bold">
+      Webhook URL
+      <span
+        id="whFormIndicator"
+        class="htmx-indicator loading loading-dots loading-md"
+      ></span>
+    </h4>
+    <form
+      class="my-4"
+      hx-post="/devices/{{.Device.ID}}/save_webhook"
+      hx-indicator="#whFormIndicator"
+    >
+      <small>Leave empty to disable</small>
+      <input
+        type="tel"
+        name="url"
+        class="mb-2 input input-bordered w-full"
+        {{with
+        .Device.Webhook
+        -}}
+        value="{{.URL}}"
+        {{-
+        end}}
+      />
+      <button type="submit" class="block mt-3 btn btn-sm btn-primary">
+        Save
+      </button>
+    </form>
+    {{- end -}} {{- if .SubMore -}}
+    <div>
+      <a
+        href="/devices/{{.Device.ID}}/reconnect"
+        role="button"
+        class="btn btn-sm btn-warning"
+        >Reconnect</a
+      >
+    </div>
+    <div class="my-5 border-red-400 border-solid border w-full p-3 rounded-box">
+      <div class="prose mb-3">
+        <h4 class="font-bold">Danger Area</h4>
+      </div>
+      <section class="prose">
+        <p>
+          In case device is not connected anymore, you may delete it. But if the
+          device still connected, ensure to logout manually from you phone
+        </p>
+        <button
+          class="btn btn-sm btn-error"
+          hx-delete="/devices/{{.Page.Device.ID}}"
+          hx-confirm="You will need to logout manually after deletion. Continue?"
+        >
+          Delete Device
+        </button>
+      </section>
+    </div>
+    {{- end -}}
+  </div>
 </div>
 {{- end }}

@@ -80,13 +80,32 @@ func (b *DevicesDetailBlock) Renderer(fs fs.FS, site *Site) (string, RenderFunc)
 	return "", fn
 }
 
-type DevicesNewTmpl struct {
-}
+type DevicesNewTmpl struct{}
 
 func (t *DevicesNewTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
 	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
 		tmp := template.Must(base.
 			ParseFS(fs, "pages/dashboard/devices_new.html"),
+		)
+
+		data, err := buildPageData(ctx, site, t)
+		if err != nil {
+			return err
+		}
+		return tmp.Execute(w, data)
+	}
+
+	return "dashboard.html", fn
+}
+
+type DevicesReconnectTmpl struct {
+	Device *devices.Device
+}
+
+func (t *DevicesReconnectTmpl) Renderer(fs fs.FS, site *Site) (string, RenderFunc) {
+	fn := func(ctx context.Context, base *template.Template, w io.Writer) error {
+		tmp := template.Must(base.
+			ParseFS(fs, "pages/dashboard/devices_reconnect.html"),
 		)
 
 		data, err := buildPageData(ctx, site, t)

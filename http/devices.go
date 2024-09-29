@@ -97,8 +97,17 @@ func webDevicesNew(s *Server, w http.ResponseWriter, r *http.Request) {
 }
 
 func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
+	deviceID := r.URL.Query().Get("id")
+
 	name := r.FormValue("name")
 	phone := r.FormValue("phone")
+
+	device, err := getDevice(s, r.Context(), deviceID)
+	if err == nil {
+		name = device.Name
+		phone = device.Phone()
+	}
+
 	cli, err := s.pbCli.RegisterDevice(r.Context(), &pb.RegisterDeviceRequest{Phone: phone, PushNotification: true})
 	if err != nil {
 		Error(s, w, r, err)
@@ -164,6 +173,13 @@ func webDevicesQRPost(s *Server, w http.ResponseWriter, r *http.Request) {
 		}
 
 		if res.LoggedIn != nil && res.Jid != nil {
+			// this means reconnect, not new
+			if device != nil {
+				s.storage.Devices.ChangeID(device.ID, *res.Jid)
+				sendSuccess()
+				return
+			}
+
 			webDevicesConnectedHandle(s, w, r, name, *res.Jid)
 			sendSuccess()
 			return
@@ -322,6 +338,17 @@ func webDevicePartialSendMessagePost(s *Server, w http.ResponseWriter, r *http.R
 		})
 	}()
 	w.Write([]byte("OK"))
+}
+
+func webDeviceReconnectView(s *Server, w http.ResponseWriter, r *http.Request) {
+	device, err := getDevice(s, r.Context(), chi.RouteContext(r.Context()).URLParam("id"))
+	if err != nil {
+		http.Error(w, "Permission Denied", http.StatusOK)
+		log.Debug().Caller().Err(err).Send()
+		return
+	}
+	tmpl := &html.DevicesReconnectTmpl{Device: device}
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
 }
 
 func webDeviceDelete(s *Server, w http.ResponseWriter, r *http.Request) {
