@@ -13,13 +13,14 @@ import (
 )
 
 const (
-	webLoginPath         = "/login"
-	webLogoutPostPath    = "/logout"
-	webDevicesPath       = "/devices"
-	webDevicesDetailPath = "/devices/{id}"
-	webDevicesNewPath    = "/devices/new"
-	webDevicesQRPath     = "/devices/qr"
-	webDevicesDeletePath = "/devices/{id}"
+	webLoginPath            = "/login"
+	webLogoutPostPath       = "/logout"
+	webDevicesPath          = "/devices"
+	webDevicesDetailPath    = "/devices/{id}"
+	webDevicesNewPath       = "/devices/new"
+	webDevicesQRPath        = "/devices/qr"
+	webDevicesDeletePath    = "/devices/{id}"
+	webDevicesReconnectPath = "/devices/{id}/reconnect"
 
 	webDevicesBlockDetailPanePath        = "/devices/{id}/pane"
 	webDevicesPartialGetStatusPath       = "/devices/{id}/_status"

@@ -1,0 +1,36 @@
+{{define "content"}}
+<p>Enter the pair code or scan the QR Code below</p>
+<div
+  class="text-2xl"
+  hx-trigger="load delay:300ms"
+  hx-target="this"
+  hx-post="/devices/qr?id={{.Device.ID}}"
+  hx-ext="chunked"
+  hx-swap="innerHTML"
+  hx-request='{"credentials":true}'
+></div>
+
+<script>
+  // this handles pairContainer bug: show list of changes after request
+  // is finished.
+  document.addEventListener("htmx:afterRequest", (e) => {
+    window.afreq = e;
+    console.log(e);
+
+    if (e.originalTarget.getAttribute("hx-target") !== "this") {
+      return;
+    }
+    if (e.detail?.xhr?.responseText?.includes("success")) {
+      window.location = "/devices";
+      return;
+    }
+
+    const swapTarget = document.querySelector(
+      e.originalTarget.getAttribute("hx-target"),
+    );
+    if (swapTarget) {
+      swapTarget.innerHTML = "<p>Pairing failed, please try again.</p>";
+    }
+  });
+</script>
+{{end}}

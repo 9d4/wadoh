@@ -29,6 +29,7 @@ func initializeRoutes(s *Server) {
 		r.Get(webDevicesBlockDetailPanePath, handle(webDevicesBlockDetailPane))
 		r.Get(webDevicesNewPath, handle(webDevicesNew))
 		r.Post(webDevicesQRPath, handle(webDevicesQRPost))
+		r.Get(webDevicesReconnectPath, handle(webDeviceReconnectView))
 		r.Delete(webDevicesDeletePath, handle(webDeviceDelete))
 
 		r.Get(webDevicesPartialGetStatusPath, handle(webDevicesGetStatus))

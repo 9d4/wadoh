@@ -97,6 +97,15 @@ func (s *devicesStore) Save(d *devices.Device) error {
 	return tx.Commit()
 }
 
+func (s *devicesStore) ChangeID(id, newID string) error {
+	query := `UPDATE wadoh_devices SET id=? WHERE id=?`
+	_, err := s.db.Exec(query, newID, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *devicesStore) Patch(d *devices.Device) error {
 	query := `UPDATE wadoh_devices SET $cols WHERE id=?`
 	cols := ""
