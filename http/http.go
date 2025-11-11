@@ -16,6 +16,7 @@ const (
 	webLoginPath            = "/login"
 	webLogoutPostPath       = "/logout"
 	webDevicesPath          = "/devices"
+	webDevicesAllPath       = "/devices/all"
 	webDevicesDetailPath    = "/devices/{id}"
 	webDevicesNewPath       = "/devices/new"
 	webDevicesQRPath        = "/devices/qr"
@@ -34,7 +35,8 @@ const (
 	webUsersDeletePath = "/users/{id}"
 	webUsersRowsPath   = "/users/rows"
 
-	apiDevicesSendMessagePath = "/api/devices/send-message"
+	apiDevicesSendMessagePath      = "/api/devices/send-message"
+	apiDevicesSendMessageImagePath = "/api/devices/send-message-image"
 
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour

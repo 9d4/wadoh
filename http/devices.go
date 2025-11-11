@@ -19,6 +19,36 @@ import (
 	"github.com/9d4/wadoh/wadoh-be/pb"
 )
 
+func webDevicesAll(s *Server, w http.ResponseWriter, r *http.Request) {
+	htmx := getHTMX(r)
+
+	user := users.UserFromContext(r.Context())
+	log.Debug().Any("user", user).Msg("webDevicesAll accessed")
+
+	if !user.Perm.Admin {
+		redirect(w, r, webDevicesPath, http.StatusFound)
+		return
+	}
+
+	devices, err := s.storage.Devices.ListByOwnerID(user.ID)
+	if err != nil {
+		Error(s, w, r, err)
+		return
+	}
+
+	listBlock := &html.DevicesListBlock{
+		Devices: devices,
+	}
+
+	if htmx != nil {
+		Error(s, w, r, s.templates.R(r.Context(), w, listBlock))
+		return
+	}
+
+	tmpl := &html.DevicesTmpl{List: listBlock}
+	Error(s, w, r, s.templates.R(r.Context(), w, tmpl))
+}
+
 func webDevices(s *Server, w http.ResponseWriter, r *http.Request) {
 	htmx := getHTMX(r)
 

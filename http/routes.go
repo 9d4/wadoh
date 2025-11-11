@@ -25,6 +25,7 @@ func initializeRoutes(s *Server) {
 			redirectRefresh(w, r, webDevicesPath, http.StatusFound)
 		})
 		r.Get(webDevicesPath, handle(webDevices))
+		r.Get(webDevicesAllPath, handle(webDevicesAll))
 		r.Get(webDevicesDetailPath, handle(webDevicesDetail))
 		r.Get(webDevicesBlockDetailPanePath, handle(webDevicesBlockDetailPane))
 		r.Get(webDevicesNewPath, handle(webDevicesNew))
@@ -53,5 +54,6 @@ func initializeRoutes(s *Server) {
 	r.Group(func(r chi.Router) {
 		r.Use(s.apiAuthenticated)
 		r.Post(apiDevicesSendMessagePath, handle(apiDevicesSendMessage))
+		r.Post(apiDevicesSendMessageImagePath, handle(apiDevicesSendMessageImage))
 	})
 }

@@ -12,8 +12,31 @@ type devicesStore struct {
 	db *sql.DB
 }
 
+var _ devices.StorageProvider = (*devicesStore)(nil)
+
 func newDevicesStore(db *sql.DB) *devicesStore {
 	return &devicesStore{db: db}
+}
+
+// ListAll implements devices.StorageProvider.
+func (s *devicesStore) ListAll(uint) ([]devices.Device, error) {
+	const query = `SELECT id, name, user_id, linked_at FROM wadoh_devices`
+
+	rows, err := s.db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	var devs []devices.Device
+	for rows.Next() {
+		var d devices.Device
+		if err := rows.Scan(&d.ID, &d.Name, &d.OwnerID, &d.LinkedAt); err != nil {
+			return nil, err
+		}
+		devs = append(devs, d)
+	}
+
+	return devs, nil
 }
 
 func (s *devicesStore) ListByOwnerID(ownerID uint) ([]devices.Device, error) {

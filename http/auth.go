@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/rs/zerolog/log"
 
 	"github.com/9d4/wadoh/html"
 	"github.com/9d4/wadoh/users"
@@ -27,15 +28,18 @@ func webLoginPost(s *Server, w http.ResponseWriter, r *http.Request) {
 	user, err := s.storage.Users.GetBy(username)
 	if err != nil {
 		sendErr()
+		log.Debug().Err(err).Msg("user retrieval failed")
 		return
 	}
 	if err := users.ComparePwd(user.Password, password); err != nil {
 		sendErr()
+		log.Debug().Err(err).Msg("password comparison failed")
 		return
 	}
 	token, tokenString, err := createUserToken(s.tokenAuth, user)
 	if err != nil {
 		sendErr()
+		log.Debug().Err(err).Msg("token creation failed")
 		return
 	}
 

@@ -3,72 +3,80 @@ syntax = "proto3";
 option go_package = "./pb";
 
 service ControllerService {
-    rpc Status (StatusRequest) returns (StatusResponse);
-    rpc RegisterDevice (RegisterDeviceRequest) returns (stream RegisterDeviceResponse);
-    rpc SendMessage (SendMessageRequest) returns (Empty);
-    rpc ReceiveMessage (Empty) returns (stream EventMessage);
-    rpc GetWebhook (GetWebhookRequest) returns (GetWebhookResponse);
-    rpc SaveWebhook (SaveWebhookRequest) returns (Empty);
-    rpc DeleteWebhook (DeleteWebhookRequest) returns (Empty);
+  rpc Status(StatusRequest) returns (StatusResponse);
+  rpc RegisterDevice(RegisterDeviceRequest) returns (stream RegisterDeviceResponse);
+  rpc SendMessage(SendMessageRequest) returns (Empty);
+  rpc SendImageMessage(SendImageMessageRequest) returns (SendImageMessageResponse);
+  rpc ReceiveMessage(Empty) returns (stream EventMessage);
+  rpc GetWebhook(GetWebhookRequest) returns (GetWebhookResponse);
+  rpc SaveWebhook(SaveWebhookRequest) returns (Empty);
+  rpc DeleteWebhook(DeleteWebhookRequest) returns (Empty);
 }
 
-message Empty {
-
-}
+message Empty {}
 
 message StatusRequest {
-    string jid = 1;
+  string jid = 1;
 }
 
 message StatusResponse {
-    enum Status {
-        STATUS_UNKNOWN = 0;
-        STATUS_ACTIVE = 1;
-        STATUS_DISCONNECTED = 2;
-        STATUS_NOT_FOUND = 3;
-    }
+  enum Status {
+    STATUS_UNKNOWN = 0;
+    STATUS_ACTIVE = 1;
+    STATUS_DISCONNECTED = 2;
+    STATUS_NOT_FOUND = 3;
+  }
 
-    Status status = 1;
+  Status status = 1;
 }
 
 message RegisterDeviceRequest {
-    string phone = 1;
-    bool push_notification = 2;
+  string phone = 1;
+  bool push_notification = 2;
 }
 
 message RegisterDeviceResponse {
-    optional string qr = 1;
-    optional string pair_code = 2;
-    optional bool loggedIn = 3;
-    optional string jid = 4;
+  optional string qr = 1;
+  optional string pair_code = 2;
+  optional bool loggedIn = 3;
+  optional string jid = 4;
 }
 
 message SendMessageRequest {
-    string jid = 1;
-    string phone = 2;
-    string body = 3;
+  string jid = 1;
+  string phone = 2;
+  string body = 3;
 }
 
+message SendImageMessageRequest {
+  string jid = 1;
+  string phone = 2;
+  bytes image = 3;
+  string caption = 4;
+}
+
+message SendImageMessageResponse {}
+
 message EventMessage {
-    string jid = 1;
-    string from = 2;
-    string message = 3;
+  string jid = 1;
+  string from = 2;
+  string message = 3;
 }
 
 message GetWebhookRequest {
-    string jid = 1;
+  string jid = 1;
 }
 
 message GetWebhookResponse {
-    string url = 1;
-    int64 timestamp = 2;
+  string url = 1;
+  int64 timestamp = 2;
 }
-    
+
 message SaveWebhookRequest {
-    string jid = 1;
-    string url = 2;
+  string jid = 1;
+  string url = 2;
 }
 
 message DeleteWebhookRequest {
-    string jid = 1;
+  string jid = 1;
 }
