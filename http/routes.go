@@ -55,5 +55,6 @@ func initializeRoutes(s *Server) {
 		r.Use(s.apiAuthenticated)
 		r.Post(apiDevicesSendMessagePath, handle(apiDevicesSendMessage))
 		r.Post(apiDevicesSendMessageImagePath, handle(apiDevicesSendMessageImage))
+		r.Post(apiDevicesSendMessageImageLinkPath, handle(apiDevicesSendMessageImageLink))
 	})
 }

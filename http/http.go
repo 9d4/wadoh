@@ -35,8 +35,9 @@ const (
 	webUsersDeletePath = "/users/{id}"
 	webUsersRowsPath   = "/users/rows"
 
-	apiDevicesSendMessagePath      = "/api/devices/send-message"
-	apiDevicesSendMessageImagePath = "/api/devices/send-message-image"
+	apiDevicesSendMessagePath          = "/api/devices/send-message"
+	apiDevicesSendMessageImagePath     = "/api/devices/send-message-image"
+	apiDevicesSendMessageImageLinkPath = "/api/devices/send-message-image-link"
 
 	userTokenCookieKey  = "jwt"
 	userTokenExpiration = 24 * time.Hour
