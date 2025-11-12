@@ -30,7 +30,7 @@ func webDevicesAll(s *Server, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	devices, err := s.storage.Devices.ListByOwnerID(user.ID)
+	devices, err := s.storage.Devices.ListAll()
 	if err != nil {
 		Error(s, w, r, err)
 		return

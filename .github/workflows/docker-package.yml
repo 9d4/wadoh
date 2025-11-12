@@ -3,10 +3,18 @@ name: Create and publish a Docker image
 on:
   push:
     branches: ['release', 'main']
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  IMAGE_TAGS: |
+    type=ref,event=branch
+    type=ref,event=pr
+    type=ref,event=tag
+    type=sha
+    # set latest tag for git tag started with `v`
+    type=raw,event=tag,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
 
 jobs:
   build-and-push-image:
@@ -33,6 +41,9 @@ jobs:
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: ${{ env.IMAGE_TAGS }}
+          flavor: latest=false
+
 
       - name: Build and push Docker image
         id: push

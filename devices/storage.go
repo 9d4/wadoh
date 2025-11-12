@@ -17,7 +17,7 @@ const (
 
 type StorageProvider interface {
 	ListByOwnerID(uint) ([]Device, error)
-	ListAll(uint) ([]Device, error)
+	ListAll() ([]Device, error)
 	GetByID(string) (*Device, error)
 	Save(*Device) error
 	Patch(*Device) error
@@ -48,8 +48,8 @@ func (s *Storage) ListByOwnerID(ownerID uint) ([]Device, error) {
 	return s.provider.ListByOwnerID(ownerID)
 }
 
-func (s *Storage) ListAll(ownerID uint) ([]Device, error) {
-	return s.provider.ListAll(ownerID)
+func (s *Storage) ListAll() ([]Device, error) {
+	return s.provider.ListAll()
 }
 
 func (s *Storage) GetByID(id string) (*Device, error) {

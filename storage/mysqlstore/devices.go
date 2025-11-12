@@ -19,7 +19,7 @@ func newDevicesStore(db *sql.DB) *devicesStore {
 }
 
 // ListAll implements devices.StorageProvider.
-func (s *devicesStore) ListAll(uint) ([]devices.Device, error) {
+func (s *devicesStore) ListAll() ([]devices.Device, error) {
 	const query = `SELECT id, name, user_id, linked_at FROM wadoh_devices`
 
 	rows, err := s.db.Query(query)
