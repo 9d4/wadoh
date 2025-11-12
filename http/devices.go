@@ -260,7 +260,7 @@ func webDevicesGetStatus(s *Server, w http.ResponseWriter, r *http.Request) {
 		log.Debug().Err(err).Caller().Send()
 		return
 	}
-	if dev.OwnerID != user.ID {
+	if dev.OwnerID != user.ID && !user.Perm.Admin {
 		w.WriteHeader(http.StatusForbidden)
 		return
 	}
