@@ -421,7 +421,7 @@ func getDevice(s *Server, ctx context.Context, deviceID string) (*devices.Device
 	if err != nil {
 		return nil, err
 	}
-	if device.OwnerID != user.ID {
+	if device.OwnerID != user.ID && !user.Perm.Admin {
 		return nil, os.ErrPermission
 	}
 	return device, nil
