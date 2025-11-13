@@ -1,64 +1,187 @@
-<div class="prose" id="partApiKey">
+<div id="partApiKey">
+  <div class="prose">
     <h4 class="font-bold">API Key</h4>
-    <button class="btn btn-sm" hx-post="/devices/{{.ID}}/genkey" hx-target="#partApiKey"
-        hx-confirm="This will invalidate current key. Continue?">Generate New</button>
+    <button
+      class="btn btn-sm"
+      hx-post="/devices/{{.ID}}/genkey"
+      hx-target="#partApiKey"
+      hx-confirm="This will invalidate current key. Continue?"
+    >
+      Generate New
+    </button>
     {{- if ne .ApiKey.ID 0 -}}
     <pre>{{.ApiKey.Token}}</pre>
     {{- else -}}
     <span>No Api Key</span>
     {{- end -}}
-    <!--docs-->
-    <div class="bg-base-200 shadow-md rounded p-6">
-        <h2 class="text-2xl font-semibold mb-4">Send Message Endpoint</h2>
-        <div class="mb-4">
-            <p class="text-lg"><strong>Endpoint:</strong> <span class="text-blue-600">/api/devices/send-message</span>
-            </p>
-        </div>
+  </div>
 
-        <div class="mb-4">
-            <p class="text-lg"><strong>Method:</strong> POST</p>
-        </div>
-
-        <div class="mb-4">
-            <h3 class="text-xl font-semibold mb-2">Headers</h3>
-            <table class="table w-full rounded shadow">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-2">Header</th>
-                        <th class="px-4 py-2">Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="px-4 py-2">Content-Type</td>
-                        <td class="px-4 py-2">application/json</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2">Authorization</td>
-                        <td class="px-4 py-2">api_key_here</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <div class="mb-4">
-            <h3 class="text-xl font-semibold mb-2">Request Body</h3>
-            <table class="table w-full rounded shadow">
-                <thead>
-                    <tr>
-                        <th class="px-4 py-2">Field</th>
-                        <th class="px-4 py-2">Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="px-4 py-2">phone</td>
-                        <td class="px-4 py-2">1230000000</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-2">body</td>
-                        <td class="px-4 py-2">Hello World</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+  <!--docs-->
+  <div class="my-4 bg-base-200 shadow-md rounded p-6">
+    <h2 class="text-2xl font-semibold mb-4">Send Message</h2>
+    <div class="mb-4">
+      <p class="font-mono">
+        <strong>POST</strong>
+        <span class="text-blue-600">/api/devices/send-message</span>
+      </p>
     </div>
+
+    <div class="mb-4">
+      <p class="font-bold">Headers</p>
+      <table class="table w-full rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Header</th>
+            <th class="px-4 py-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="px-4 py-2">Content-Type</td>
+            <td class="px-4 py-2">application/json</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">Authorization</td>
+            <td class="px-4 py-2">api_key_here</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mb-4">
+      <p class="font-bold">Request Body</p>
+      <table class="table w-full rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Field</th>
+            <th class="px-4 py-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="px-4 py-2">phone</td>
+            <td class="px-4 py-2">1230000000</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">body</td>
+            <td class="px-4 py-2">Hello World</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="my-4 bg-base-200 shadow-md rounded p-6">
+    <h2 class="text-2xl font-semibold mb-4">Send Image</h2>
+    <div class="mb-4">
+      <p class="font-mono">
+        <strong>POST</strong>
+        <span class="text-blue-600">/api/devices/send-message-image</span>
+      </p>
+    </div>
+
+    <div class="mb-4">
+      <p class="font-bold">Headers</p>
+      <table class="table w-full rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Header</th>
+            <th class="px-4 py-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="px-4 py-2">Content-Type</td>
+            <td class="px-4 py-2">multipart/form-data</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">Authorization</td>
+            <td class="px-4 py-2">api_key_here</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mb-4">
+      <p class="font-bold">Request Body</p>
+      <table class="table w-full rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Field</th>
+            <th class="px-4 py-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="px-4 py-2">phone</td>
+            <td class="px-4 py-2">1230000000</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">image</td>
+            <td class="px-4 py-2">File</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">caption</td>
+            <td class="px-4 py-2">optional caption</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="my-4 bg-base-200 shadow-md rounded p-6">
+    <h2 class="text-2xl font-semibold mb-4">Send Image (Link)</h2>
+    <div class="mb-4">
+      <p class="font-mono">
+        <strong>POST</strong>
+        <span class="text-blue-600">/api/devices/send-message-image-link</span>
+      </p>
+    </div>
+
+    <div class="mb-4">
+      <p class="font-bold">Headers</p>
+      <table class="table w-full rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Header</th>
+            <th class="px-4 py-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="px-4 py-2">Content-Type</td>
+            <td class="px-4 py-2">application/json</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">Authorization</td>
+            <td class="px-4 py-2">api_key_here</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mb-4">
+      <p class="font-bold">Request Body</p>
+      <table class="table w-full rounded shadow">
+        <thead>
+          <tr>
+            <th class="px-4 py-2">Field</th>
+            <th class="px-4 py-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="px-4 py-2">phone</td>
+            <td class="px-4 py-2">1230000000</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">url</td>
+            <td class="px-4 py-2">url to image</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2">caption</td>
+            <td class="px-4 py-2">optional caption</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!--/docs-->
+</div>
